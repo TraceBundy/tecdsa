@@ -50,9 +50,9 @@ func (proofOfDLogEquivalenceInstance) FromCommitments(g curve.EccPoint, h curve.
 
 func (p *ProofOfDLogEquivalenceInstance) RecoverCommitments(proof *ProofOfDLogEquivalence) (curve.EccPoint, curve.EccPoint, error) {
 	gz := p.g.Clone().ScalarMul(p.g, proof.response)
-	hz := p.h.ScalarMul(p.h, proof.response)
+	hz := p.h.Clone().ScalarMul(p.h, proof.response)
 	gr := gz.SubPoints(gz, p.gx.Clone().ScalarMul(p.gx, proof.challenge))
-	hr := hz.SubPoints(hz, p.hx.ScalarMul(p.hx, proof.challenge))
+	hr := hz.SubPoints(hz, p.hx.Clone().ScalarMul(p.hx, proof.challenge))
 	return gr, hr, nil
 }
 
@@ -67,7 +67,15 @@ func (p *ProofOfDLogEquivalenceInstance) HashToChallenge(c1 curve.EccPoint, c2 c
 	ro.AddPoint("commitment2", c2)
 	return ro.OutputScalar(p.curveType)
 }
-func (p *proofOfDLogEquivalenceInstance) Create(seed seed.Seed, x curve.EccScalar, g, h curve.EccPoint, associatedData []byte) (*ProofOfDLogEquivalence, error) {
+/*
+ * gx = x * G
+ * hx = x * H
+ * gr = r * G
+ * hr = h * G
+ * m = H(ad, g, h, gx, hx, gr, hr)
+ * s = x * m + r
+ */
+func (p *proofOfDLogEquivalenceInstance) Create(seed *seed.Seed, x curve.EccScalar, g, h curve.EccPoint, associatedData []byte) (*ProofOfDLogEquivalence, error) {
 	instance, err := p.FromWitness(g, h, x)
 	if err != nil {
 		return nil, err
@@ -84,6 +92,14 @@ func (p *proofOfDLogEquivalenceInstance) Create(seed seed.Seed, x curve.EccScala
 	}, nil
 }
 
+/*
+ * gz = s * G
+ * hz = s * H
+ * gr = gz - gx * m = (x * m + r) * G - x * m * G = r*G
+ * hr = hz - hx * m = (x * m + r) * H - x * m * H = r*H
+ * m' = H(ad, g, h, gx, hx, gr, hr)
+ * m == m`
+ */
 func (p *ProofOfDLogEquivalence) Verify(g, h, gx, hx curve.EccPoint, associatedData []byte) error {
 	instance, err := ProofOfDLogEquivalenceIns.FromCommitments(g, h, gx, hx)
 	if err != nil {

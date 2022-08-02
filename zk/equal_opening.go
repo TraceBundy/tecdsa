@@ -60,7 +60,7 @@ func (proofOfEqualOpeningsInstance) FromCommitments(pedersen curve.EccPoint, sim
 	}
 }
 
-func (p proofOfEqualOpeningsInstance) Create(seed seed.Seed, secret curve.EccScalar, masking curve.EccScalar, associatedData []byte) (*ProofOfEqualOpenings, error) {
+func (p proofOfEqualOpeningsInstance) Create(seed *seed.Seed, secret curve.EccScalar, masking curve.EccScalar, associatedData []byte) (*ProofOfEqualOpenings, error) {
 	/*
 	 * a = g^s · h^m, b = g^s
 	 * com = h^r
@@ -95,7 +95,7 @@ func (p *ProofOfEqualOpeningsInstance) RecoverCommitments(proof *ProofOfEqualOpe
 	 */
 	amb := p.a.Clone().SubPoints(p.a, p.b)
 	camb := amb.Clone().ScalarMul(amb, proof.challenge)
-	hc := p.h.ScalarMul(p.h, proof.response)
+	hc := p.h.Clone().ScalarMul(p.h, proof.response)
 	return hc.SubPoints(hc, camb)
 }
 

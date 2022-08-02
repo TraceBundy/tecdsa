@@ -65,29 +65,12 @@ func (p *ProofOfProductInstance) RecoverCommitment(proof *ProofOfProduct) (curve
 	return r1Com, r2Com
 }
 
-func (p *ProofOfProductInstance) Create(seed seed.Seed, lhs curve.EccScalar, rhs curve.EccScalar, rhsMasking curve.EccScalar, product curve.EccScalar, productMasking curve.EccScalar, associatedData []byte) (*ProofOfProduct, error) {
-	/*
-		 lc = g^l
-		 rc = g^r * h^rm
-		 pc = g^p * h^pm
-	l	 r1c = g^r1
-		 r2c = rc^r1 * h^r2
-		 ch = H(lc, rc, pc, r1c, r2c, associated_data)
-		 s1 = (l * ch) + r1
-		 s2 = (pm - l*rm)*ch + r2
-
-		 r1c = g^s1 - lc^ch = g^((l * ch) + r1) - (g^l)ch
-		 r2c = (rc^s1 * h^s2) - (pc ^ ch) = rc^((l * ch) + r1)*h^((pm - l*rm)*ch + r2) - (g^p * h^pm)^ch = rc^(1*ch)* rc^r1 * h^((pm-l*rm)*ch+r2) - g^(p*ch)*h^(pm*ch)
-			=rc^s1*h^s2 - (g^p*h^pm)^ch = rc^s1*h^s2 - (g^(p*ch)*h^(pm*h))
-		    = (g^r*h^rm)^(l*ch)+r1)*h^s2 - (g^(p*ch)*h^(pm*h))
-		    = g^(r*l*ch+r*r1)*h^(rm*l*ch+rm*r1)*h^s2 - (g^(p*ch)*h^(pm*h))
-		 =
-	*/
+func (p *proofOfProductInstance) Create(seed *seed.Seed, lhs curve.EccScalar, rhs curve.EccScalar, rhsMasking curve.EccScalar, product curve.EccScalar, productMasking curve.EccScalar, associatedData []byte) (*ProofOfProduct, error) {
 	instance := ProofOfProductIns.FromWitness(lhs, rhs, rhsMasking, product, productMasking)
 	rng := seed.Rng()
-	r1 := curve.Scalar.Random(p.curveType, rng)
+	r1 := curve.Scalar.Random(lhs.CurveType(), rng)
 	r1Com := instance.g.Clone().ScalarMul(instance.g, r1)
-	r2 := curve.Scalar.Random(p.curveType, rng)
+	r2 := curve.Scalar.Random(lhs.CurveType(), rng)
 	r2Com := curve.Point.MulPoints(instance.rhsCom, r1, instance.h, r2)
 	challenge, err := instance.HashToChallenge(r1Com, r2Com, associatedData)
 	if err != nil {
