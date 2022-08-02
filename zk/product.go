@@ -113,3 +113,10 @@ func (p *ProofOfProduct) Verify(lhsCom curve.EccPoint, rhsCom curve.EccPoint, pr
 	}
 	return nil
 }
+func (p *ProofOfProduct) Clone() *ProofOfProduct {
+	return &ProofOfProduct{
+		challenge: p.challenge,
+		response1: p.response1,
+		response2: p.response2,
+	}
+}

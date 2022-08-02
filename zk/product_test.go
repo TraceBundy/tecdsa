@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestZkMulProofWork(t *testing.T)  {
+func TestZkMulProofWork(t *testing.T) {
 	curveType := curve.K256
 	rng := rng()
 	var ad [32]byte

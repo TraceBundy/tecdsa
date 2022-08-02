@@ -1,5 +1,7 @@
 package curve
 
+import "math/big"
+
 var (
 	Field = field{}
 )
@@ -23,6 +25,7 @@ type EccFieldElement interface {
 	Sqrt(other EccFieldElement) (EccFieldElement, int)
 	Progenitor(other EccFieldElement) EccFieldElement
 	Sign() uint8
+	BigInt() *big.Int
 }
 
 func (f field) Zero(curve EccCurveType) EccFieldElement {

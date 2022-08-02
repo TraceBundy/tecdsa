@@ -2,55 +2,341 @@ package mega
 
 import (
 	"github.com/PlatONnetwork/tecdsa/common"
+	"github.com/PlatONnetwork/tecdsa/curve"
 	"github.com/PlatONnetwork/tecdsa/poly"
 	"github.com/PlatONnetwork/tecdsa/seed"
 	"github.com/PlatONnetwork/tecdsa/zk"
 	"github.com/pkg/errors"
-	"go.dedis.ch/kyber/v3"
 )
+
+type MEGaCiphertextType int
+
+func (m MEGaCiphertextType) EncryptionDomainSep() string {
+	switch m {
+	case CiphertextSingle:
+		return "ic-crypto-tecdsa-mega-encryption-single-encrypt"
+	case CiphertextPairs:
+		return "ic-crypto-tecdsa-mega-encryption-pair-encrypt"
+	}
+	return ""
+}
+
+func (m MEGaCiphertextType) PopBaseDomainSep() string {
+	switch m {
+	case CiphertextSingle:
+		return "ic-crypto-tecdsa-mega-encryption-single-pop-base"
+	case CiphertextPairs:
+		return "ic-crypto-tecdsa-mega-encryption-pair-pop-base"
+	}
+	return ""
+}
+
+func (m MEGaCiphertextType) PopProofDomainSep() string {
+	switch m {
+	case CiphertextSingle:
+		return "ic-crypto-tecdsa-mega-encryption-single-pop-proof"
+	case CiphertextPairs:
+		return "ic-crypto-tecdsa-mega-encryption-pair-pop-proof"
+	}
+	return ""
+}
+
+func (m MEGaCiphertextType) EphemeralKeyDomainSep() string {
+	switch m {
+	case CiphertextSingle:
+		return "ic-crypto-tecdsa-mega-encryption-single-ephemeral-key"
+	case CiphertextPairs:
+		return "ic-crypto-tecdsa-mega-encryption-pair-ephemeral-key"
+	}
+	return ""
+}
 
 type MEGaCiphertext interface {
 	Recipients() int
 	CType() MEGaCiphertextType
-	EphemeralKey() kyber.Point
-	PopPublicKey() kyber.Point
-	PopProof() *zk.ProofOfDLogEquivalence
-	CheckValidity() error
+	Ephemeral() curve.EccPoint
+	PopPublic() curve.EccPoint
+	Proof() *zk.ProofOfDLogEquivalence
+	CheckValidity(expectedRecipients int, ad []byte, dealerIndex common.NodeIndex) error
+	VerifyIs(ctype MEGaCiphertextType, curveType curve.EccCurveType) error
 	DecryptAndCheck(commitment poly.PolynomialCommitment, ad []byte, dealerIndex common.NodeIndex, receiverIndex common.NodeIndex, secretKey *MEGaPrivateKey, publicKey *MEGaPublicKey) (poly.CommitmentOpening, error)
 }
 
-func EncryptSingle(seed seed.Seed, plaintexts []kyber.Scalar, recipients []*MEGaPublicKey, dealerIndex common.NodeIndex, ad []byte) (*MEGaCiphertextSingle, error) {
+func EncryptCiphertextSingle(seed *seed.Seed, plaintexts []curve.EccScalar, recipients []*MEGaPublicKey, dealerIndex common.NodeIndex, ad []byte) (*MEGaCiphertextSingle, error) {
 	if err := checkPlaintexts(plaintexts, recipients); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	beta, v, popPublicKey, popProof, err := ComputeEphKeyAndPop(CiphertextSingle, plaintexts[0].CurveType(), seed, ad, dealerIndex)
+	if err != nil {
+		return nil, err
+	}
+	ctexts := make([]curve.EccScalar, len(recipients))
+	for index := 0; index < len(recipients); index++ {
+		pubkey, ptext := recipients[index], plaintexts[index]
+		ubeta := pubkey.point.Clone().ScalarMul(pubkey.point, beta)
+		hm, err := megaHashToScalars(CiphertextSingle, dealerIndex, common.NodeIndex(index), ad, pubkey.point, v, ubeta)
+		if err != nil {
+			return nil, err
+		}
+		ctext := hm[0].Add(hm[0], ptext)
+		ctexts[index] = ctext
+	}
+	return &MEGaCiphertextSingle{
+		EphemeralKey: v,
+		PopPublicKey: popPublicKey,
+		PopProof:     popProof,
+		CTexts:       ctexts,
+	}, nil
 }
 
-func checkPlaintexts(plaintexts []kyber.Scalar, recipients []*MEGaPublicKey) error {
-	if len(plaintexts) == len(recipients) {
+func checkPlaintexts(plaintexts []curve.EccScalar, recipients []*MEGaPublicKey) error {
+	if len(plaintexts) != len(recipients) {
 		return errors.New("Must be as many plaintexts as recipients")
 	}
 	if len(plaintexts) == 0 {
 		return errors.New("Must encrypt at least one plaintext")
 	}
+	curveType := plaintexts[0].CurveType()
+	for i := range plaintexts {
+		if plaintexts[i].CurveType() != curveType {
+			return errors.New("curve type mismatch")
+		}
+	}
+	for i := range recipients {
+		if recipients[i].CurveType() != curveType {
+			return errors.New("curve type mismatch")
+		}
+	}
 	return nil
 }
 
-func computeEphKeyAndPop(ctype MEGaCiphertextType, seed seed.Seed, ad []byte, dealerIndex common.NodeIndex) {
-
+func checkPlaintextsPair(plaintexts [][2]curve.EccScalar, recipients []*MEGaPublicKey) error {
+	if len(plaintexts) != len(recipients) {
+		return errors.New("Must be as many plaintexts as recipients")
+	}
+	if len(plaintexts) == 0 {
+		return errors.New("Must encrypt at least one plaintext")
+	}
+	curveType := plaintexts[0][0].CurveType()
+	for i := range plaintexts {
+		if plaintexts[i][0].CurveType() != curveType || plaintexts[i][1].CurveType() != curveType {
+			return errors.New("curve type mismatch")
+		}
+	}
+	for i := range recipients {
+		if recipients[i].CurveType() != curveType {
+			return errors.New("curve type mismatch")
+		}
+	}
+	return nil
 }
 
 type MEGaCiphertextSingle struct {
-	EphemeralKey kyber.Point
-	PopPublicKey kyber.Point
-	PopProof     zk.ProofOfDLogEquivalence
-	CTexts       []kyber.Scalar
+	EphemeralKey curve.EccPoint
+	PopPublicKey curve.EccPoint
+	PopProof     *zk.ProofOfDLogEquivalence
+	CTexts       []curve.EccScalar
+}
+
+func (m MEGaCiphertextSingle) Clone() *MEGaCiphertextSingle {
+	ctexts := make([]curve.EccScalar, len(m.CTexts), len(m.CTexts))
+	for i, c := range m.CTexts {
+		ctexts[i] = c.Clone()
+	}
+	return &MEGaCiphertextSingle{
+		EphemeralKey: m.EphemeralKey.Clone(),
+		PopPublicKey: m.PopPublicKey.Clone(),
+		PopProof:     m.PopProof.Clone(),
+		CTexts:       ctexts,
+	}
+}
+
+func (m MEGaCiphertextSingle) Recipients() int {
+	return len(m.CTexts)
+}
+
+func (m MEGaCiphertextSingle) CType() MEGaCiphertextType {
+	return CiphertextSingle
+}
+
+func (m MEGaCiphertextSingle) Ephemeral() curve.EccPoint {
+	return m.EphemeralKey
+}
+
+func (m MEGaCiphertextSingle) PopPublic() curve.EccPoint {
+	return m.PopPublicKey
+}
+
+func (m MEGaCiphertextSingle) Proof() *zk.ProofOfDLogEquivalence {
+	return m.PopProof
+}
+
+func (m MEGaCiphertextSingle) CheckValidity(expectedRecipients int, ad []byte, dealerIndex common.NodeIndex) error {
+	if m.Recipients() != expectedRecipients {
+		return errors.New("invalid recipients")
+	}
+	return m.VerifyPop(ad, dealerIndex)
+}
+func (m MEGaCiphertextSingle) VerifyIs(ctype MEGaCiphertextType, curveType curve.EccCurveType) error {
+	if m.EphemeralKey.CurveType() != curveType || m.PopPublicKey.CurveType() != curveType || m.PopProof.CurveType() != curveType {
+		return errors.New("curve mismatch")
+	}
+	for _, c := range m.CTexts {
+		if c.CurveType() != curveType {
+			return errors.New("curve mismatch")
+		}
+	}
+	if m.CType() != ctype {
+		return errors.New("inconsistent ciphertext")
+	}
+	return nil
+}
+
+func (m MEGaCiphertextSingle) VerifyPop(ad []byte, dealerIndex common.NodeIndex) error {
+	return VerifyPop(CiphertextSingle, ad, dealerIndex, m.EphemeralKey, m.PopPublicKey, m.PopProof)
+}
+
+func (m MEGaCiphertextSingle) DecryptFromSharedSecret(ad []byte, dealerIndex common.NodeIndex, recipientIndex common.NodeIndex, recipientPublicKey *MEGaPublicKey, sharedSecret curve.EccPoint) (curve.EccScalar, error) {
+	if len(m.CTexts) <= int(recipientIndex) {
+		return nil, errors.New("invalid index")
+	}
+	hm, err := megaHashToScalars(CiphertextSingle, dealerIndex, recipientIndex, ad, recipientPublicKey.point, m.EphemeralKey, sharedSecret)
+	if err != nil {
+		return nil, err
+	}
+	return m.CTexts[int(recipientIndex)].Clone().Sub(m.CTexts[int(recipientIndex)], hm[0]), nil
+}
+func (m MEGaCiphertextSingle) Decrypt(ad []byte, dealerIndex common.NodeIndex, recipientIndex common.NodeIndex, privateKey *MEGaPrivateKey, recipientPublicKey *MEGaPublicKey) (curve.EccScalar, error) {
+	if err := m.VerifyPop(ad, dealerIndex); err != nil {
+		return nil, err
+	}
+	ubeta := m.EphemeralKey.Clone().ScalarMul(m.EphemeralKey, privateKey.secret)
+	return m.DecryptFromSharedSecret(ad, dealerIndex, recipientIndex, recipientPublicKey, ubeta)
+}
+func (m MEGaCiphertextSingle) DecryptAndCheck(commitment poly.PolynomialCommitment, ad []byte, dealerIndex common.NodeIndex, receiverIndex common.NodeIndex, secretKey *MEGaPrivateKey, publicKey *MEGaPublicKey) (poly.CommitmentOpening, error) {
+	scalar, err := m.Decrypt(ad, dealerIndex, receiverIndex, secretKey, publicKey)
+	if err != nil {
+		return nil, err
+	}
+	opening := poly.SimpleCommitmentOpening{scalar}
+	if !commitment.CheckOpening(receiverIndex, opening) {
+		return nil, errors.New("invalid commitment")
+	}
+	return opening, nil
 }
 
 type MEGaCiphertextPair struct {
-	EphemeralKey kyber.Point
-	PopPublicKey kyber.Point
-	PopProof     zk.ProofOfDLogEquivalence
-	CTexts       []kyber.Scalar
+	EphemeralKey curve.EccPoint
+	PopPublicKey curve.EccPoint
+	PopProof     *zk.ProofOfDLogEquivalence
+	CTexts       [][2]curve.EccScalar
+}
+
+func EncryptCiphertextPair(seed *seed.Seed, plaintexts [][2]curve.EccScalar, recipients []*MEGaPublicKey, dealerIndex common.NodeIndex, ad []byte) (*MEGaCiphertextPair, error) {
+	if err := checkPlaintextsPair(plaintexts, recipients); err != nil {
+		return nil, err
+	}
+	beta, v, popPublicKey, popProof, err := ComputeEphKeyAndPop(CiphertextPairs, plaintexts[0][0].CurveType(), seed, ad, dealerIndex)
+	if err != nil {
+		return nil, err
+	}
+	ctexts := make([][2]curve.EccScalar, len(recipients))
+	for index := 0; index < len(recipients); index++ {
+		pubkey, ptext := recipients[index], plaintexts[index]
+		ubeta := pubkey.point.Clone().ScalarMul(pubkey.point, beta)
+		hm, err := megaHashToScalars(CiphertextPairs, dealerIndex, common.NodeIndex(index), ad, pubkey.point, v, ubeta)
+		if err != nil {
+			return nil, err
+		}
+		ctext0 := hm[0].Add(hm[0], ptext[0])
+		ctext1 := hm[1].Add(hm[1], ptext[1])
+		ctexts[index] = [2]curve.EccScalar{ctext0, ctext1}
+	}
+	return &MEGaCiphertextPair{
+		EphemeralKey: v,
+		PopPublicKey: popPublicKey,
+		PopProof:     popProof,
+		CTexts:       ctexts,
+	}, nil
+}
+
+func (m MEGaCiphertextPair) Recipients() int {
+	return len(m.CTexts)
+}
+
+func (MEGaCiphertextPair) CType() MEGaCiphertextType {
+	return CiphertextPairs
+}
+
+func (m MEGaCiphertextPair) Ephemeral() curve.EccPoint {
+	return m.EphemeralKey
+}
+
+func (m MEGaCiphertextPair) PopPublic() curve.EccPoint {
+	return m.PopPublicKey
+}
+
+func (m MEGaCiphertextPair) Proof() *zk.ProofOfDLogEquivalence {
+	return m.PopProof
+}
+
+func (m MEGaCiphertextPair) VerifyPop(ad []byte, dealerIndex common.NodeIndex) error {
+	return VerifyPop(CiphertextPairs, ad, dealerIndex, m.EphemeralKey, m.PopPublicKey, m.PopProof)
+}
+
+func (m MEGaCiphertextPair) DecryptFromSharedSecret(ad []byte, dealerIndex common.NodeIndex, recipientIndex common.NodeIndex, recipientPublicKey *MEGaPublicKey, sharedSecret curve.EccPoint) ([2]curve.EccScalar, error) {
+	if len(m.CTexts) <= int(recipientIndex) {
+		return [2]curve.EccScalar{}, errors.New("invalid index")
+	}
+	hm, err := megaHashToScalars(CiphertextPairs, dealerIndex, recipientIndex, ad, recipientPublicKey.point, m.EphemeralKey, sharedSecret)
+	if err != nil {
+		return [2]curve.EccScalar{}, err
+	}
+	ptext0 := m.CTexts[int(recipientIndex)][0].Clone().Sub(m.CTexts[int(recipientIndex)][0], hm[0])
+	ptext1 := m.CTexts[int(recipientIndex)][1].Clone().Sub(m.CTexts[int(recipientIndex)][1], hm[1])
+	return [2]curve.EccScalar{ptext0, ptext1}, nil
+
+}
+func (m MEGaCiphertextPair) Decrypt(ad []byte, dealerIndex common.NodeIndex, recipientIndex common.NodeIndex, privateKey *MEGaPrivateKey, recipientPublicKey *MEGaPublicKey) ([2]curve.EccScalar, error) {
+	if err := m.VerifyPop(ad, dealerIndex); err != nil {
+		return [2]curve.EccScalar{}, err
+	}
+	ubeta := m.EphemeralKey.Clone().ScalarMul(m.EphemeralKey, privateKey.secret)
+	return m.DecryptFromSharedSecret(ad, dealerIndex, recipientIndex, recipientPublicKey, ubeta)
+}
+
+func (m MEGaCiphertextPair) CheckValidity(expectedRecipients int, ad []byte, dealerIndex common.NodeIndex) error {
+	if m.Recipients() != expectedRecipients {
+		return errors.New("invalid recipients")
+	}
+	return m.VerifyPop(ad, dealerIndex)
+}
+
+func (m MEGaCiphertextPair) VerifyIs(ctype MEGaCiphertextType, curveType curve.EccCurveType) error {
+	if m.EphemeralKey.CurveType() != curveType || m.PopPublicKey.CurveType() != curveType || m.PopProof.CurveType() != curveType {
+		return errors.New("curve mismatch")
+	}
+	for _, c := range m.CTexts {
+		if c[0].CurveType() != curveType || c[1].CurveType() != curveType {
+			return errors.New("curve mismatch")
+		}
+	}
+	if m.CType() != ctype {
+		return errors.New("inconsistent ciphertext")
+	}
+	return nil
+}
+func (m MEGaCiphertextPair) DecryptAndCheck(commitment poly.PolynomialCommitment, ad []byte, dealerIndex common.NodeIndex, receiverIndex common.NodeIndex, secretKey *MEGaPrivateKey, publicKey *MEGaPublicKey) (poly.CommitmentOpening, error) {
+	scalar, err := m.Decrypt(ad, dealerIndex, receiverIndex, secretKey, publicKey)
+	if err != nil {
+		return nil, err
+	}
+	opening := poly.PedersenCommitmentOpening{}
+	opening[0] = scalar[0]
+	opening[1] = scalar[1]
+	if !commitment.CheckOpening(receiverIndex, opening) {
+		return nil, errors.New("invalid commitment")
+	}
+	return opening, nil
 }

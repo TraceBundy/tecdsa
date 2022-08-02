@@ -144,6 +144,9 @@ func (s *Secp256k1Scalar) UnmarshalCBOR(data []byte) error {
 	s.scalar = tmp.scalar
 	return nil
 }
+func (s Secp256k1Scalar) BigInt() *big.Int {
+	return s.scalar.BigInt()
+}
 
 type Secp256K1ScalarBytes [32]byte
 

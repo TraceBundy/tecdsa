@@ -177,3 +177,6 @@ func (s Secp256k1Field) Sign() uint8 {
 	bytes := s.field.Bytes()
 	return common.ReverseBytes(bytes[:])[native.FieldBytes-1] & 1
 }
+func (s Secp256k1Field) BigInt() *big.Int {
+	return s.field.BigInt()
+}

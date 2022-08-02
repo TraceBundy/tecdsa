@@ -5,6 +5,7 @@ import (
 	"github.com/PlatONnetwork/tecdsa/rand"
 	"github.com/PlatONnetwork/tecdsa/seed"
 	"github.com/pkg/errors"
+	"math/big"
 )
 
 var (
@@ -24,6 +25,8 @@ type EccScalar interface {
 	Clone() EccScalar
 	Equal(other EccScalar) int
 	IsZero() int
+	IsHigh() bool
+	BigInt() *big.Int
 	Serialize() []byte
 	SerializeTagged() []byte
 }
@@ -105,7 +108,7 @@ func (s scalar) Random(curve EccCurveType, rng rand.Rand) EccScalar {
 	}
 }
 
-func (s scalar) FromSeed(curve EccCurveType, seed seed.Seed) EccScalar {
+func (s scalar) FromSeed(curve EccCurveType, seed *seed.Seed) EccScalar {
 	rng := seed.Rng()
 	return s.Random(curve, rng)
 }

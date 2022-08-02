@@ -10,6 +10,7 @@ import (
 var (
 	SimpleCM   = simpleCommitment{}
 	PedersenCM = pedersenCommitment{}
+	Commitment = commitmentOpening{}
 )
 
 type CommitmentOpeningBytes interface {
@@ -148,6 +149,15 @@ func (s simpleCommitment) Create(poly *Polynomial, num int) (*SimpleCommitment, 
 	}
 	return s.New(points), nil
 }
+func (s *SimpleCommitment) Clone() PolynomialCommitment {
+	points := make([]curve.EccPoint, len(s.points), len(s.points))
+	for i, p := range s.points {
+		points[i] = p.Clone()
+	}
+	return &SimpleCommitment{
+		points: points,
+	}
+}
 
 func (s *SimpleCommitment) Serialize() ([]byte, error) {
 	var data []byte
@@ -208,7 +218,7 @@ func (s *SimpleCommitment) Equal(other PolynomialCommitment) int {
 func (s *SimpleCommitment) CurveType() curve.EccCurveType {
 	return s.points[0].CurveType()
 }
-func (s *SimpleCommitment) OpeningIfConsistent(index common.NodeIndex, opening CommitmentOpening) (CommitmentOpening, error) {
+func (s *SimpleCommitment) ReturnOpeningIfConsistent(index common.NodeIndex, opening CommitmentOpening) (CommitmentOpening, error) {
 	if s.CheckOpening(index, opening) {
 		return opening, nil
 	}
@@ -232,7 +242,7 @@ func (s *SimpleCommitment) EvaluateAt(evalPoint common.NodeIndex) curve.EccPoint
 }
 
 func (s *SimpleCommitment) CheckOpening(evalPoint common.NodeIndex, opening CommitmentOpening) bool {
-	o := opening.(*PedersenCommitmentOpening)
+	o := opening.(SimpleCommitmentOpening)
 	return s.checkOpening(evalPoint, o[0])
 }
 func (s *SimpleCommitment) checkOpening(evalPoint common.NodeIndex, value curve.EccScalar) bool {
@@ -259,6 +269,16 @@ func (p pedersenCommitment) Create(values *Polynomial, masking *Polynomial, num 
 		points[i] = curve.Point.Pedersen(values.Coeff(i), masking.Coeff(i))
 	}
 	return p.New(points), nil
+}
+
+func (s *PedersenCommitment) Clone() PolynomialCommitment {
+	points := make([]curve.EccPoint, len(s.points), len(s.points))
+	for i, p := range s.points {
+		points[i] = p.Clone()
+	}
+	return &PedersenCommitment{
+		points: points,
+	}
 }
 
 func (p *PedersenCommitment) Serialize() ([]byte, error) {
@@ -321,7 +341,7 @@ func (p *PedersenCommitment) Equal(other PolynomialCommitment) int {
 func (p *PedersenCommitment) CurveType() curve.EccCurveType {
 	return p.points[0].CurveType()
 }
-func (p *PedersenCommitment) OpeningIfConsistent(index common.NodeIndex, opening CommitmentOpening) (CommitmentOpening, error) {
+func (p *PedersenCommitment) ReturnOpeningIfConsistent(index common.NodeIndex, opening CommitmentOpening) (CommitmentOpening, error) {
 	if p.CheckOpening(index, opening) {
 		return opening, nil
 	}
@@ -344,7 +364,7 @@ func (p *PedersenCommitment) EvaluateAt(evalPoint common.NodeIndex) curve.EccPoi
 	return evaluateAt(p.points, evalPoint)
 }
 func (p *PedersenCommitment) CheckOpening(evalPoint common.NodeIndex, opening CommitmentOpening) bool {
-	o := opening.(*PedersenCommitmentOpening)
+	o := opening.(PedersenCommitmentOpening)
 	return p.checkOpening(evalPoint, o[0], o[1])
 }
 
@@ -370,9 +390,10 @@ type PolynomialCommitment interface {
 	EvaluateAt(evalPoint common.NodeIndex) curve.EccPoint
 	ConstantTerm() curve.EccPoint
 	CurveType() curve.EccCurveType
-	OpeningIfConsistent(index common.NodeIndex, opening CommitmentOpening) (CommitmentOpening, error)
+	ReturnOpeningIfConsistent(index common.NodeIndex, opening CommitmentOpening) (CommitmentOpening, error)
 	VerifyIs(ctype PolynomialCommitmentType, curveType curve.EccCurveType) error
 	CheckOpening(evalPoint common.NodeIndex, opening CommitmentOpening) bool
+	Clone() PolynomialCommitment
 }
 
 type polynomialCommitment struct{}

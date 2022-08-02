@@ -120,7 +120,7 @@ func TestPointMulByNodeIndex(t *testing.T) {
 		for nodeIndex := 0; nodeIndex < 300; nodeIndex++ {
 			gNi := g.MulByNodeIndex(common.NodeIndex(nodeIndex))
 			scalar := Scalar.FromNodeIndex(curve, common.NodeIndex(nodeIndex))
-			gs := g.ScalarMul(g, scalar)
+			gs := g.Clone().ScalarMul(g, scalar)
 			assert.Equal(t, 1, gs.Equal(gNi))
 		}
 	}

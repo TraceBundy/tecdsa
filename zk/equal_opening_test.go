@@ -14,7 +14,7 @@ func rng() *rand.ChaCha20 {
 	rng := rand.NewChaCha20(key.Bytes())
 	return rng
 }
-func TestZkEqualOpeningsProofWork(t *testing.T)  {
+func TestZkEqualOpeningsProofWork(t *testing.T) {
 	curveType := curve.K256
 	rng := rng()
 	var ad [32]byte
@@ -29,6 +29,6 @@ func TestZkEqualOpeningsProofWork(t *testing.T)  {
 	assert.Nil(t, err)
 	assert.Nil(t, proof.Verify(pedersen, simple, ad[:]))
 	assert.NotNil(t, proof.Verify(simple, simple, ad[:]))
-	assert.NotNil(t,  proof.Verify(simple, pedersen, ad[:]))
-	assert.NotNil(t,  proof.Verify(pedersen, pedersen, ad[:]))
+	assert.NotNil(t, proof.Verify(simple, pedersen, ad[:]))
+	assert.NotNil(t, proof.Verify(pedersen, pedersen, ad[:]))
 }
