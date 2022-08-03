@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestRandomOracleStability(t *testing.T)  {
+func TestRandomOracleStability(t *testing.T) {
 	curveType := curve.K256
 	var bytes [32]byte
 	for i := range bytes {
@@ -19,7 +19,7 @@ func TestRandomOracleStability(t *testing.T)  {
 
 	ro := NewRandomOracle("ic-test-domain-sep")
 	s1 := curve.Scalar.Random(curveType, rng)
-	pt1 := curve.Point.GeneratorG(curveType).ScalarMul(curve.Point.GeneratorG(curveType),s1)
+	pt1 := curve.Point.GeneratorG(curveType).ScalarMul(curve.Point.GeneratorG(curveType), s1)
 	ro.AddPoint("pt1", pt1)
 	assert.NotNil(t, ro.AddPoint("pt1", pt1))
 	var b42 [42]byte
@@ -30,7 +30,7 @@ func TestRandomOracleStability(t *testing.T)  {
 	ro.AddBytesString("v1", b42[:])
 	ro.AddScalar("s1", s1)
 	ro.AddUint64("round", 1)
-	c1, err := ro.outputScalar(curveType, 2)
+	c1, err := ro.OutputScalars(curveType, 2)
 	assert.Nil(t, err)
 	assert.Equal(t, "e1cc3546518665d7321cd5b5aa7cbae2ae9d8bad3a2f28b495ac3d3af139b460", hex.EncodeToString(c1[0].Serialize()))
 	assert.Equal(t, "d46b5ef6fafdaf2a1e50f7b979f1fd31e058e9c2ab69115c4f2c15077ae94969", hex.EncodeToString(c1[1].Serialize()))

@@ -133,12 +133,12 @@ func (s *Secp256k1Point) ScalarMul(other EccPoint, scalar EccScalar) EccPoint {
 }
 func (s *Secp256k1Point) MulByNodeIndex(scalar common.NodeIndex) EccPoint {
 	s64 := uint64(scalar + 1)
-	bits := bits.LeadingZeros64(uint64(s64))
+	bits := 64 - bits.LeadingZeros64(uint64(s64))
 	res := EccPoint(K256Point.Identity())
 	for b := 0; b < bits; b++ {
 		res = res.Double(res)
-		if s64>>(bits-1-b)&1 == 1 {
-			res = res.AddPoints(res, res)
+		if (s64 >> (bits - 1 - b) & 1) == 1 {
+			res = res.AddPoints(res, s)
 		}
 	}
 	return res

@@ -67,6 +67,7 @@ func (p *ProofOfDLogEquivalenceInstance) HashToChallenge(c1 curve.EccPoint, c2 c
 	ro.AddPoint("commitment2", c2)
 	return ro.OutputScalar(p.curveType)
 }
+
 /*
  * gx = x * G
  * hx = x * H
@@ -121,4 +122,11 @@ func (p *ProofOfDLogEquivalence) Verify(g, h, gx, hx curve.EccPoint, associatedD
 
 func (p *ProofOfDLogEquivalence) CurveType() curve.EccCurveType {
 	return p.challenge.CurveType()
+}
+
+func (p ProofOfDLogEquivalence) Clone() *ProofOfDLogEquivalence {
+	return &ProofOfDLogEquivalence{
+		challenge: p.challenge.Clone(),
+		response:  p.response.Clone(),
+	}
 }

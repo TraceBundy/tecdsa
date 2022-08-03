@@ -3,11 +3,25 @@ package mega
 import (
 	"github.com/PlatONnetwork/tecdsa/curve"
 	"github.com/PlatONnetwork/tecdsa/rand"
+	"github.com/PlatONnetwork/tecdsa/seed"
 )
+
 var (
-	PublicKey = mEGaPublicKey{}
+	PublicKey  = mEGaPublicKey{}
 	PrivateKey = mEGaPrivateKey{}
 )
+
+func GenKeypair(curveType curve.EccCurveType, seed *seed.Seed) (*MEGaPublicKey, *MEGaPrivateKey, error) {
+	rng := seed.Rng()
+	privateKey := PrivateKey.GeneratePrivateKey(curveType, rng)
+	publicKey := privateKey.PublicKey()
+	return publicKey, privateKey, nil
+}
+
+func VerifyMegaPublicKey(curveType curve.EccCurveType, raw []byte) error {
+	_, err := PublicKey.Deserialize(curveType, raw)
+	return err
+}
 
 type MEGaPublicKey struct {
 	point curve.EccPoint

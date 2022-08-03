@@ -105,7 +105,7 @@ func (s scalar) Random(curve EccCurveType, rng rand.Rand) EccScalar {
 	}
 }
 
-func (s scalar) FromSeed(curve EccCurveType, seed seed.Seed) EccScalar {
+func (s scalar) FromSeed(curve EccCurveType, seed *seed.Seed) EccScalar {
 	rng := seed.Rng()
 	return s.Random(curve, rng)
 }

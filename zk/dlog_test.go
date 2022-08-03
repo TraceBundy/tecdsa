@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestZkDlogEqProofWork(t *testing.T)  {
+func TestZkDlogEqProofWork(t *testing.T) {
 	curveType := curve.K256
 	rng := rng()
 	var ad [32]byte
@@ -28,5 +28,5 @@ func TestZkDlogEqProofWork(t *testing.T)  {
 	assert.Nil(t, err)
 	assert.Nil(t, proof.Verify(g, h, gx, hx, ad[:]))
 	assert.NotNil(t, proof.Verify(h, g, gx, hx, ad[:]))
-	assert.NotNil(t, proof.Verify(g, h, hx,gx,  ad[:]))
+	assert.NotNil(t, proof.Verify(g, h, hx, gx, ad[:]))
 }

@@ -11,21 +11,11 @@ import (
 )
 
 const (
-	Bytestring = RandomOracleInputType(1)
+	ByteString = RandomOracleInputType(1)
 	Integer    = RandomOracleInputType(2)
 	Point      = RandomOracleInputType(3)
 	Scalar     = RandomOracleInputType(4)
 )
-
-type Item struct {
-	Key string
-	Val []byte
-}
-
-func byKeys(a, b interface{}) bool {
-	i1, i2 := a.(*Item), b.(*Item)
-	return i1.Key < i2.Key
-}
 
 type RandomOracle struct {
 	domainSeparator string
@@ -62,7 +52,7 @@ func (r *RandomOracle) AddInput(name string, input []byte, ty RandomOracleInputT
 	encodedInput = append(encodedInput, buf[:]...)
 	encodedInput = append(encodedInput, input...)
 	r.inputSize += 1 + len(name) + len(encodedInput)
-	r.inputs.Set(name,encodedInput)
+	r.inputs.Set(name, encodedInput)
 	return nil
 }
 
@@ -87,7 +77,7 @@ func (r *RandomOracle) AddScalar(name string, s curve.EccScalar) error {
 }
 
 func (r *RandomOracle) AddBytesString(name string, v []byte) error {
-	return r.AddInput(name, v, Bytestring)
+	return r.AddInput(name, v, ByteString)
 }
 
 func (r *RandomOracle) AddUint64(name string, i uint64) error {
@@ -103,14 +93,14 @@ func (r *RandomOracle) AddUint32(name string, i uint32) error {
 }
 
 func (r *RandomOracle) OutputScalar(curveType curve.EccCurveType) (curve.EccScalar, error) {
-	res, err := r.outputScalar(curveType, 1)
+	res, err := r.OutputScalars(curveType, 1)
 	if err != nil {
 		return nil, err
 	}
 	return res[0], nil
 }
 
-func (r *RandomOracle) outputScalar(curveType curve.EccCurveType, cnt int) ([]curve.EccScalar, error) {
+func (r *RandomOracle) OutputScalars(curveType curve.EccCurveType, cnt int) ([]curve.EccScalar, error) {
 	roInput, err := r.formRoInput()
 	if err != nil {
 		return nil, err
