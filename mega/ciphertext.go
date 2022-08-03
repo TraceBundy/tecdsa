@@ -57,7 +57,7 @@ type MEGaCiphertext interface {
 	Ephemeral() curve.EccPoint
 	PopPublic() curve.EccPoint
 	Proof() *zk.ProofOfDLogEquivalence
-	CheckValidity() error
+	CheckValidity(expectedRecipients int, ad []byte, dealerIndex common.NodeIndex) error
 	DecryptAndCheck(commitment poly.PolynomialCommitment, ad []byte, dealerIndex common.NodeIndex, receiverIndex common.NodeIndex, secretKey *MEGaPrivateKey, publicKey *MEGaPublicKey) (poly.CommitmentOpening, error)
 }
 
@@ -254,15 +254,15 @@ func (MEGaCiphertextPair) CType() MEGaCiphertextType {
 	return CiphertextPairs
 }
 
-func (m MEGaCiphertextPair) GetEphemeralKey() curve.EccPoint {
+func (m MEGaCiphertextPair) Ephemeral() curve.EccPoint {
 	return m.EphemeralKey
 }
 
-func (m MEGaCiphertextPair) GetPopPublicKey() curve.EccPoint {
+func (m MEGaCiphertextPair) PopPublic() curve.EccPoint {
 	return m.PopPublicKey
 }
 
-func (m MEGaCiphertextPair) GetPopProof() *zk.ProofOfDLogEquivalence {
+func (m MEGaCiphertextPair) Proof() *zk.ProofOfDLogEquivalence {
 	return m.PopProof
 }
 
