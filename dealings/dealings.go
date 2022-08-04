@@ -128,5 +128,43 @@ func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, 
 	if err := dealing.Ciphertext.CheckValidity(numberOfReceivers, ad, dealerIndex); err != nil {
 		return err
 	}
-	transcriptType
+
+	if _, ok := transcriptType.(*RandomTranscript); ok && dealing.Proof == nil {
+		if err := dealing.Commitment.VerifyIs(poly2.Pedersen, curveType); err != nil {
+			return err
+		}
+		if err := dealing.Ciphertext.VerifyIs(mega.CiphertextPairs, curveType); err != nil {
+			return err
+		}
+	}
+	if t, ok := transcriptType.(*ReshareOfMaskedTranscript); ok && dealing.Proof != nil && dealing.Proof.Type() == ProofOfMaskedResharing {
+		if err := dealing.Commitment.VerifyIs(poly2.Simple, curveType); err != nil {
+			return err
+		}
+		if err := dealing.Ciphertext.VerifyIs(mega.CiphertextSingle, curveType); err != nil {
+			return err
+		}
+		if err := dealing.Proof.(*MaskedResharingProof).Verify(t.P1.EvaluateAt(dealerIndex), dealing.Commitment.ConstantTerm(), ad); err != nil {
+			return err
+		}
+	}
+	if t, ok := transcriptType.(*ReshareOfUnmaskedTranscript); ok && dealing.Proof != nil {
+		if err := dealing.Commitment.VerifyIs(poly2.Simple, curveType); err != nil {
+			return err
+		}
+		if err := t.P1.VerifyIs(poly2.Simple, curveType); err != nil {
+			return err
+		}
+		if err := dealing.Ciphertext.VerifyIs(mega.CiphertextSingle, curveType); err != nil {
+			return err
+		}
+		switch c := t.P1.(type) {
+		case *poly2.PedersenCommitment:
+			return errors.New("unexpected commitment type")
+		case *poly2.SimpleCommitment:
+			if c.EvaluateAt(dealerIndex).Equal(dealing.Commitment.ConstantTerm()) != 1 {
+				return errors.New("invalid commitment")
+			}
+		}
+	}
 }

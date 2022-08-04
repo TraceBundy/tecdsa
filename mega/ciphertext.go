@@ -58,6 +58,7 @@ type MEGaCiphertext interface {
 	PopPublic() curve.EccPoint
 	Proof() *zk.ProofOfDLogEquivalence
 	CheckValidity(expectedRecipients int, ad []byte, dealerIndex common.NodeIndex) error
+	VerifyIs(ctype MEGaCiphertextType, curveType curve.EccCurveType) error
 	DecryptAndCheck(commitment poly.PolynomialCommitment, ad []byte, dealerIndex common.NodeIndex, receiverIndex common.NodeIndex, secretKey *MEGaPrivateKey, publicKey *MEGaPublicKey) (poly.CommitmentOpening, error)
 }
 
@@ -176,6 +177,20 @@ func (m MEGaCiphertextSingle) CheckValidity(expectedRecipients int, ad []byte, d
 		return errors.New("invalid recipients")
 	}
 	return m.VerifyPop(ad, dealerIndex)
+}
+func (m MEGaCiphertextSingle) VerifyIs(ctype MEGaCiphertextType, curveType curve.EccCurveType) error {
+	if m.EphemeralKey.CurveType() != curveType || m.PopPublicKey.CurveType() != curveType || m.PopProof.CurveType() != curveType {
+		return errors.New("curve mismatch")
+	}
+	for _, c := range m.CTexts {
+		if c.CurveType() != curveType {
+			return errors.New("curve mismatch")
+		}
+	}
+	if m.CType() != ctype {
+		return errors.New("inconsistent ciphertext")
+	}
+	return nil
 }
 
 func (m MEGaCiphertextSingle) VerifyPop(ad []byte, dealerIndex common.NodeIndex) error {
@@ -298,6 +313,20 @@ func (m MEGaCiphertextPair) CheckValidity(expectedRecipients int, ad []byte, dea
 	return m.VerifyPop(ad, dealerIndex)
 }
 
+func (m MEGaCiphertextPair) VerifyIs(ctype MEGaCiphertextType, curveType curve.EccCurveType) error {
+	if m.EphemeralKey.CurveType() != curveType || m.PopPublicKey.CurveType() != curveType || m.PopProof.CurveType() != curveType {
+		return errors.New("curve mismatch")
+	}
+	for _, c := range m.CTexts {
+		if c[0].CurveType() != curveType || c[1].CurveType() != curveType {
+			return errors.New("curve mismatch")
+		}
+	}
+	if m.CType() != ctype {
+		return errors.New("inconsistent ciphertext")
+	}
+	return nil
+}
 func (m MEGaCiphertextPair) DecryptAndCheck(commitment poly.PolynomialCommitment, ad []byte, dealerIndex common.NodeIndex, receiverIndex common.NodeIndex, secretKey *MEGaPrivateKey, publicKey *MEGaPublicKey) (poly.CommitmentOpening, error) {
 	scalar, err := m.Decrypt(ad, dealerIndex, receiverIndex, secretKey, publicKey)
 	if err != nil {
