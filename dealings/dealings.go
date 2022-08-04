@@ -118,6 +118,15 @@ func NewIDkgDealingInternal(shares SecretShares, curveType curve.EccCurveType, s
 	return &IDkgDealingInternal{ciphertext, commitment, proof}, nil
 
 }
-func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, transcriptType int, reconstructionThreshold int, dealerIndex common.NodeIndex, numberOfReceivers int, ad []byte) error {
-	dealing.Ciphertext.CheckValidity()
+func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, transcriptType IDkgTranscriptOperationInternal, reconstructionThreshold int, dealerIndex common.NodeIndex, numberOfReceivers int, ad []byte) error {
+	if dealing.Commitment.Len() != reconstructionThreshold {
+		return errors.New("invalid commitment")
+	}
+	if dealing.Commitment.CurveType() != curveType {
+		return errors.New("curve mismatch")
+	}
+	if err := dealing.Ciphertext.CheckValidity(numberOfReceivers, ad, dealerIndex); err != nil {
+		return err
+	}
+	transcriptType
 }

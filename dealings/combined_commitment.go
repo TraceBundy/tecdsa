@@ -1,13 +1,16 @@
 package dealings
 
-import "github.com/PlatONnetwork/tecdsa/poly"
+import (
+	"github.com/PlatONnetwork/tecdsa/poly"
+)
 
 type CombinedCommitment interface {
+	poly.PolynomialCommitment
 	Serialize() ([]byte, error)
 }
 
 type SummationCommitment struct {
-	Commitment *poly.PolynomialCommitment
+	poly.PolynomialCommitment
 }
 
 func (s SummationCommitment) Serialize() ([]byte, error) {
@@ -16,7 +19,7 @@ func (s SummationCommitment) Serialize() ([]byte, error) {
 }
 
 type InterpolationCommitment struct {
-	Commitment *poly.PolynomialCommitment
+	poly.PolynomialCommitment
 }
 
 func (i InterpolationCommitment) Serialize() ([]byte, error) {

@@ -65,7 +65,9 @@ func NewMEGaPrivateKey(secret curve.EccScalar) *MEGaPrivateKey {
 		secret: secret,
 	}
 }
-
+func (m MEGaPrivateKey) CurveType() curve.EccCurveType {
+	return m.secret.CurveType()
+}
 func (m MEGaPrivateKey) PublicKey() *MEGaPublicKey {
 	return NewMEGaPublicKey(curve.Point.MulByG(m.secret))
 }
