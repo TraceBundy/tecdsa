@@ -363,7 +363,7 @@ func (p *PedersenCommitment) EvaluateAt(evalPoint common.NodeIndex) curve.EccPoi
 	return evaluateAt(p.points, evalPoint)
 }
 func (p *PedersenCommitment) CheckOpening(evalPoint common.NodeIndex, opening CommitmentOpening) bool {
-	o := opening.(*PedersenCommitmentOpening)
+	o := opening.(PedersenCommitmentOpening)
 	return p.checkOpening(evalPoint, o[0], o[1])
 }
 

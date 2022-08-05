@@ -80,7 +80,7 @@ func (commitmentOpening) CombineOpenings(nodeIndexOpenings []common.NodeIndex, c
 		}
 		opening = poly.PedersenCommitmentOpening([2]curve.EccScalar{combinedValue, combinedMask})
 	case *InterpolationCommitment:
-		switch _ := t.PolynomialCommitment.(type) {
+		switch t.PolynomialCommitment.(type) {
 		case *poly.SimpleCommitment:
 			xValues := make([]common.NodeIndex, 0, len(commitmentOpenings))
 			values := make([]curve.EccScalar, 0, len(commitmentOpenings))

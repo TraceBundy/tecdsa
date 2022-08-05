@@ -11,6 +11,7 @@ type ZkProofType int
 
 type ZkProof interface {
 	Type() ZkProofType
+	Clone() ZkProof
 }
 
 type MaskedResharingProof struct {
@@ -20,6 +21,11 @@ type MaskedResharingProof struct {
 func (MaskedResharingProof) Type() ZkProofType {
 	return ProofOfMaskedResharing
 }
+func (m MaskedResharingProof) Clone() ZkProof {
+	return &MaskedResharingProof{
+		m.ProofOfEqualOpenings.Clone(),
+	}
+}
 
 type ProductProof struct {
 	*zk.ProofOfProduct
@@ -27,4 +33,9 @@ type ProductProof struct {
 
 func (ProductProof) Type() ZkProofType {
 	return ProofOfMaskedResharing
+}
+func (p ProductProof) Clone() ZkProof {
+	return &ProductProof{
+		p.ProofOfProduct.Clone(),
+	}
 }

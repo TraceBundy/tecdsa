@@ -122,3 +122,10 @@ func (p *ProofOfEqualOpenings) Verify(pedersen curve.EccPoint, simple curve.EccP
 	}
 	return err
 }
+
+func (p *ProofOfEqualOpenings) Clone() *ProofOfEqualOpenings {
+	return &ProofOfEqualOpenings{
+		challenge: p.challenge.Clone(),
+		response:  p.response.Clone(),
+	}
+}
