@@ -91,7 +91,7 @@ func NewIDkgDealingInternal(shares SecretShares, curveType curve.EccCurveType, s
 		if err != nil {
 			return nil, err
 		}
-		if ciphertext, commitment, err = EncryptAndCommitSinglePolynomial(values, numCoefficients, recipients, dealerIndex, ad, megaSeed)err != nil {
+		if ciphertext, commitment, err = EncryptAndCommitSinglePolynomial(values, numCoefficients, recipients, dealerIndex, ad, megaSeed); err != nil {
 			return nil, err
 		}
 		if p, err := zk.ProofOfEqualOpeningsIns.Create(seed.Derive(zk.ProofOfEqualOpeningsDst), s.S1, s.S2, ad); err != nil {
@@ -136,8 +136,7 @@ func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, 
 		if err := dealing.Ciphertext.VerifyIs(mega.CiphertextPairs, curveType); err != nil {
 			return err
 		}
-	}
-	if t, ok := transcriptType.(*ReshareOfMaskedTranscript); ok && dealing.Proof != nil && dealing.Proof.Type() == ProofOfMaskedResharing {
+	} else if t, ok := transcriptType.(*ReshareOfMaskedTranscript); ok && dealing.Proof != nil && dealing.Proof.Type() == ProofOfMaskedResharing {
 		if err := dealing.Commitment.VerifyIs(poly2.Simple, curveType); err != nil {
 			return err
 		}
@@ -147,8 +146,7 @@ func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, 
 		if err := dealing.Proof.(*MaskedResharingProof).Verify(t.P1.EvaluateAt(dealerIndex), dealing.Commitment.ConstantTerm(), ad); err != nil {
 			return err
 		}
-	}
-	if t, ok := transcriptType.(*ReshareOfUnmaskedTranscript); ok && dealing.Proof != nil {
+	} else if t, ok := transcriptType.(*ReshareOfUnmaskedTranscript); ok && dealing.Proof != nil {
 		if err := dealing.Commitment.VerifyIs(poly2.Simple, curveType); err != nil {
 			return err
 		}
@@ -166,5 +164,32 @@ func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, 
 				return errors.New("invalid commitment")
 			}
 		}
+	} else if t, ok := transcriptType.(*UnmaskedTimesMaskedTranscript); ok && dealing.Proof.Type() == ProofOfProduct {
+		if err := dealing.Commitment.VerifyIs(poly2.Pedersen, curveType); err != nil {
+			return err
+		}
+		if err := dealing.Ciphertext.VerifyIs(mega.CiphertextPairs, curveType); err != nil {
+			return err
+		}
+		if err := t.Left.VerifyIs(poly2.Simple, curveType); err != nil {
+			return err
+		}
+		if err := t.Right.VerifyIs(poly2.Pedersen, curveType); err != nil {
+			return err
+		}
+		if err := dealing.Proof.(*ProductProof).Verify(t.Left.EvaluateAt(dealerIndex), t.Right.EvaluateAt(dealerIndex), dealing.Commitment.ConstantTerm(), ad); err != nil {
+			return err
+		}
+	} else {
+		return errors.New("invalid proof")
 	}
+	return nil
+}
+
+func (dealing IDkgDealingInternal) PrivateVerify(curveType curve.EccCurveType, privateKey *mega.MEGaPrivateKey, publicKey *mega.MEGaPublicKey, ad []byte, dealerIndex common.NodeIndex, recipientIndex common.NodeIndex) error {
+	if privateKey.CurveType() != curveType || publicKey.CurveType() != curveType || dealing.Commitment.ConstantTerm().CurveType() != curveType {
+		return errors.New("curve mismatch")
+	}
+	_, err := dealing.Ciphertext.DecryptAndCheck(dealing.Commitment, ad, dealerIndex, recipientIndex, privateKey, publicKey)
+	return err
 }

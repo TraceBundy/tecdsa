@@ -24,6 +24,7 @@ type EccScalar interface {
 	Clone() EccScalar
 	Equal(other EccScalar) int
 	IsZero() int
+	IsHigh() bool
 	Serialize() []byte
 	SerializeTagged() []byte
 }
