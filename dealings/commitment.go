@@ -16,6 +16,10 @@ var (
 type commitmentOpening struct {
 }
 
+func (c commitmentOpening) OpenDealing(verifiedDealing *IDkgDealingInternal, ad []byte, dealerIndex common.NodeIndex, openerIndex common.NodeIndex, openerSecretKey *mega.MEGaPrivateKey, openerPublicKey *mega.MEGaPublicKey) (poly.CommitmentOpening, error) {
+	return verifiedDealing.Ciphertext.DecryptAndCheck(verifiedDealing.Commitment, ad, dealerIndex, openerIndex, openerSecretKey, openerPublicKey)
+
+}
 func (c commitmentOpening) FromDealingsAndOpenings(verifiedDealings *btree.Map[common.NodeIndex, *IDkgDealingInternal], providedOpenings *btree.Map[common.NodeIndex, *btree.Map[common.NodeIndex, poly.CommitmentOpening]], transcriptCommitment CombinedCommitment, contextData []byte, receiverIndex common.NodeIndex, secretKey *mega.MEGaPrivateKey, publicKey *mega.MEGaPublicKey) (poly.CommitmentOpening, error) {
 	nodeIndexOpenings := make([]common.NodeIndex, 0, verifiedDealings.Len())
 	commitmentOpenings := make([]poly.CommitmentOpening, 0, verifiedDealings.Len())

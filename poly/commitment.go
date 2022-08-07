@@ -10,6 +10,7 @@ import (
 var (
 	SimpleCM   = simpleCommitment{}
 	PedersenCM = pedersenCommitment{}
+	Commitment = commitmentOpening{}
 )
 
 type CommitmentOpeningBytes interface {
