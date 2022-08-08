@@ -1,6 +1,7 @@
 package sign
 
 import (
+	"fmt"
 	"github.com/PlatONnetwork/tecdsa/common"
 	"github.com/PlatONnetwork/tecdsa/curve"
 	"github.com/PlatONnetwork/tecdsa/dealings"
@@ -78,6 +79,12 @@ func (t ThresholdEcdsaCombinedSigInternal) Verify(derivationPath *key.Derivation
 		return err
 	}
 	if t.R.Equal(rho) == 0 || t.S.IsHigh() {
+		if t.R.Equal(rho) == 0 {
+			fmt.Println("")
+		}
+		if t.S.IsHigh() {
+			fmt.Println("")
+		}
 		return errors.New("invalid signature")
 	}
 

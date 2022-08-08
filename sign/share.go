@@ -31,7 +31,7 @@ func NewThresholdEcdsaSigShareInternal(derivationPath *key.DerivationPath, hashe
 		lambdaMask = l[1]
 	}
 	var nu poly2.CommitmentOpening
-	if k, ok := keyTimesLambda.(*poly2.PedersenCommitmentOpening); ok {
+	if k, ok := keyTimesLambda.(poly2.PedersenCommitmentOpening); ok {
 		nuValue := theta.Clone().Mul(theta, lambdaValue)
 		nuValue = nuValue.Add(nuValue, rho.Clone().Mul(rho, k[0]))
 		nuMask := theta.Clone().Mul(theta, lambdaMask)
@@ -40,7 +40,7 @@ func NewThresholdEcdsaSigShareInternal(derivationPath *key.DerivationPath, hashe
 	}
 
 	var mu poly2.CommitmentOpening
-	if k, ok := kappaTimesLambda.(*poly2.PedersenCommitmentOpening); ok {
+	if k, ok := kappaTimesLambda.(poly2.PedersenCommitmentOpening); ok {
 		muValue := randomizer.Clone().Mul(randomizer, lambdaValue)
 		muValue = muValue.Add(muValue, k[0])
 		muMask := randomizer.Clone().Mul(randomizer, lambdaMask)

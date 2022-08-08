@@ -75,11 +75,11 @@ type SignatureProtocolExecution struct {
 }
 
 func NewSignatureProtocolExecution(setup *SignatureProtocolSetup, signedMessage []byte, randomBeacon []byte, derivationPath *key.DerivationPath) *SignatureProtocolExecution {
-	hashedMessage := sha256.New().Sum(signedMessage)
+	hashedMessage := sha256.Sum256(signedMessage)
 	return &SignatureProtocolExecution{
 		Setup:          setup,
 		SignedMessage:  signedMessage,
-		HashedMessage:  hashedMessage,
+		HashedMessage:  hashedMessage[:],
 		RandomBeacon:   randomBeacon,
 		DerivationPath: derivationPath,
 	}
@@ -103,7 +103,7 @@ func (s SignatureProtocolExecution) GenerateSignature(shares *btree.Map[common.N
 }
 
 func (s SignatureProtocolExecution) VerifySignature(sig *sign.ThresholdEcdsaCombinedSigInternal) error {
-	if err := sig.Verify(s.DerivationPath, s.HashedMessage, s.RandomBeacon, s.Setup.Kappa.Transcript, s.Setup.Key.Transcript, curve.K256); err != nil {
+	if err := sig.Verify(s.DerivationPath, s.HashedMessage, s.RandomBeacon, s.Setup.Key.Transcript, s.Setup.Kappa.Transcript, curve.K256); err != nil {
 		return err
 	}
 	pk, err := s.Setup.PublicKey(s.DerivationPath)

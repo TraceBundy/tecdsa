@@ -117,8 +117,8 @@ func ComputeHMAC(f func() hash.Hash, k []byte, msg ...[]byte) ([]byte, error) {
 	mac := hmac.New(f, k)
 	for _, m := range msg {
 		w, err := mac.Write(m)
-		if w != len(msg) {
-			return nil, fmt.Errorf("bytes written to hash doesn't match expected: %v != %v", w, len(msg))
+		if w != len(m) {
+			return nil, fmt.Errorf("bytes written to hash doesn't match expected: %v != %v", w, len(m))
 		} else if err != nil {
 			return nil, err
 		}

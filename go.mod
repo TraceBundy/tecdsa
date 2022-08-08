@@ -18,7 +18,7 @@ require (
 require (
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/kr/pretty v0.2.1 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect

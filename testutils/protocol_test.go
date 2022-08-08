@@ -3,6 +3,7 @@ package testutils
 import (
 	"github.com/PlatONnetwork/tecdsa/common"
 	"github.com/PlatONnetwork/tecdsa/curve"
+	"github.com/PlatONnetwork/tecdsa/key"
 	"github.com/PlatONnetwork/tecdsa/sign"
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/btree"
@@ -118,4 +119,37 @@ func RandomSubset(shares *btree.Map[common.NodeIndex, *sign.ThresholdEcdsaSigSha
 		}
 	}
 	return &result
+}
+
+func TestShouldBasicSigningProtocolWork(t *testing.T) {
+	testSigSerialization := func(sig *sign.ThresholdEcdsaCombinedSigInternal) error {
+		return nil
+	}
+	nodes := 4
+	threshold := nodes / 3
+	numberOfDealingsCorrupted := threshold
+	setup, err := NewSignatureProtocolSetup(curve.K256, nodes, threshold, numberOfDealingsCorrupted, RandomSeed())
+	assert.Nil(t, err)
+	rng := RandomSeed().Rng()
+
+	var signedMessage [32]byte
+	rng.FillUint8(signedMessage[:])
+	var randomBeacon [32]byte
+	rng.FillUint8(signedMessage[:])
+	derivationPath := key.NewBip32([]uint32{1, 2, 3})
+	proto := NewSignatureProtocolExecution(setup, signedMessage[:], randomBeacon[:], derivationPath)
+	shares, err := proto.GenerateShares()
+	assert.Nil(t, err)
+	for i := 4; i <= nodes; i++ {
+		shares := RandomSubset(shares, i)
+		if shares.Len() < threshold {
+			_, err := proto.GenerateSignature(shares)
+			assert.NotNil(t, err)
+		} else {
+			sig, err := proto.GenerateSignature(shares)
+			assert.Nil(t, err)
+			testSigSerialization(sig)
+			assert.Nil(t, proto.VerifySignature(sig))
+		}
+	}
 }

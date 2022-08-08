@@ -18,14 +18,14 @@ func ConvertHashToInteger(hashedMsg []byte, curveType curve.EccCurveType) (curve
 	return curve.Scalar.FromBytesWide(curveType, hashedMsg)
 }
 
-func DeriveRho(curveType curve.EccCurveType, hashedMsg []byte, randomness []byte, derivattionPath *key.DerivationPath, keyTranscript *dealings.IDkgTranscriptInternal, presigTranscript *dealings.IDkgTranscriptInternal) (curve.EccScalar, curve.EccScalar, curve.EccScalar, curve.EccPoint, error) {
+func DeriveRho(curveType curve.EccCurveType, hashedMsg []byte, randomness []byte, derivationPath *key.DerivationPath, keyTranscript *dealings.IDkgTranscriptInternal, presigTranscript *dealings.IDkgTranscriptInternal) (curve.EccScalar, curve.EccScalar, curve.EccScalar, curve.EccPoint, error) {
 	var preSig curve.EccPoint
 	if p, ok := presigTranscript.CombinedCommitment.(*dealings.InterpolationCommitment); ok && p.PolynomialCommitment.Type() == poly2.Simple {
 		preSig = p.PolynomialCommitment.(*poly2.SimpleCommitment).ConstantTerm()
 	} else {
 		return nil, nil, nil, nil, errors.New("unexpected commitment type")
 	}
-	keyTweak, _, err := derivattionPath.DeriveTweak(keyTranscript.ConstantTerm())
+	keyTweak, _, err := derivationPath.DeriveTweak(keyTranscript.ConstantTerm())
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -38,7 +38,7 @@ func DeriveRho(curveType curve.EccCurveType, hashedMsg []byte, randomness []byte
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
-	randomizedPresig := preSig.AddPoints(preSig, curve.Point.GeneratorG(curveType).ScalarMul(curve.Point.GeneratorG(curveType), randomizer))
+	randomizedPresig := preSig.Clone().AddPoints(preSig, curve.Point.GeneratorG(curveType).ScalarMul(curve.Point.GeneratorG(curveType), randomizer))
 	rho, err := EcdsaConversion(randomizedPresig)
 	if err != nil {
 		return nil, nil, nil, nil, err
