@@ -20,6 +20,10 @@ type ProtocolRound struct {
 	Dealings   *btree.Map[common.NodeIndex, *dealings.IDkgDealingInternal]
 }
 
+func (p ProtocolRound) ConstantTerm() curve.EccPoint {
+	return p.Commitment.ConstantTerm()
+}
+
 type protocolRound struct {
 }
 
@@ -37,6 +41,88 @@ func (p protocolRound) New(setup *ProtocolSetup, dealings *btree.Map[common.Node
 	}, nil
 }
 
+func (p protocolRound) Random(setup *ProtocolSetup, numberOfDealers int, numberOfDealingsCorrupted int) (*ProtocolRound, error) {
+	shares := make([]dealings.SecretShares, 0, numberOfDealers)
+	for i, _ := range shares {
+		shares[i] = &dealings.RandomSecret{}
+	}
+	mode := &dealings.RandomTranscript{}
+	dealings, err := CreateDealings(setup, shares, numberOfDealers, numberOfDealingsCorrupted, mode, setup.NextDealingSeed())
+	if err != nil {
+		return nil, err
+	}
+	transcript, err := CreateTranscript(setup, dealings, mode)
+	if err != nil {
+		return nil, err
+	}
+	return p.New(setup, dealings, transcript)
+}
+func (p protocolRound) ReshareOfMasked(setup *ProtocolSetup, masked *ProtocolRound, numberOfDealers int, numberOfDealingsCorrupted int) (*ProtocolRound, error) {
+	shares := make([]dealings.SecretShares, len(masked.Openings))
+	for i, opening := range masked.Openings {
+		if o, ok := opening.(poly.PedersenCommitmentOpening); ok {
+			shares[i] = &dealings.ReshareOfMaskedSecret{S1: o[0], S2: o[1]}
+		} else {
+			panic("unexpected opening type")
+		}
+	}
+	mode := &dealings.ReshareOfMaskedTranscript{P1: masked.Commitment.Clone()}
+	dealings, err := CreateDealings(setup, shares, numberOfDealers, numberOfDealingsCorrupted, mode, setup.NextDealingSeed())
+	if err != nil {
+		return nil, err
+	}
+	transcript, err := CreateTranscript(setup, dealings, mode)
+	if err != nil {
+		return nil, err
+	}
+	return p.New(setup, dealings, transcript)
+}
+
+func (p protocolRound) ReshareOfUnmasked(setup *ProtocolSetup, unmasked *ProtocolRound, numberOfDealers int, numberOfDealingsCorrupted int) (*ProtocolRound, error) {
+	shares := make([]dealings.SecretShares, len(unmasked.Openings))
+	for i, opening := range unmasked.Openings {
+		if o, ok := opening.(poly.SimpleCommitmentOpening); ok {
+			shares[i] = &dealings.ReshareOfUnmaskedSecret{S1: o[0]}
+		} else {
+			panic("unexpected opening type")
+		}
+	}
+	mode := &dealings.ReshareOfUnmaskedTranscript{P1: unmasked.Commitment.Clone()}
+	dealings, err := CreateDealings(setup, shares, numberOfDealers, numberOfDealingsCorrupted, mode, setup.NextDealingSeed())
+	if err != nil {
+		return nil, err
+	}
+	transcript, err := CreateTranscript(setup, dealings, mode)
+	if err != nil {
+		return nil, err
+	}
+	return p.New(setup, dealings, transcript)
+}
+
+func (p protocolRound) Multiply(setup *ProtocolSetup, masked *ProtocolRound, unmasked *ProtocolRound, numberOfDealers int, numberOfDealingsCorrupted int) (*ProtocolRound, error) {
+	shares := make([]dealings.SecretShares, len(unmasked.Openings))
+	for i, opening := range unmasked.Openings {
+		if o, ok := opening.(poly.SimpleCommitmentOpening); ok {
+			p, ok := masked.Openings[i].(poly.PedersenCommitmentOpening)
+			if !ok {
+				panic("unexpected opening type")
+			}
+			shares[i] = &dealings.UnmaskedTimesMaskedSecret{Left: o[0], Right: p}
+		} else {
+			panic("unexpected opening type")
+		}
+	}
+	mode := &dealings.UnmaskedTimesMaskedTranscript{Left: unmasked.Commitment.Clone(), Right: masked.Commitment.Clone()}
+	dealings, err := CreateDealings(setup, shares, numberOfDealingsCorrupted, numberOfDealingsCorrupted, mode, setup.NextDealingSeed())
+	if err != nil {
+		return nil, err
+	}
+	transcript, err := CreateTranscript(setup, dealings, mode)
+	if err != nil {
+		return nil, err
+	}
+	return p.New(setup, dealings, transcript)
+}
 func (p protocolRound) VerifyCommitmentOpenings(commitment poly.PolynomialCommitment, openings []poly.CommitmentOpening) error {
 	constantTerm := commitment.ConstantTerm()
 	curveType := constantTerm.CurveType()

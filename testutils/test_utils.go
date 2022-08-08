@@ -8,7 +8,7 @@ import (
 	seed2 "github.com/PlatONnetwork/tecdsa/seed"
 )
 
-func CorruptDealing(dealing *dealings.IDkgDealingInternal, corruptionTargets []common.NodeIndex, seed seed2.Seed) (*dealings.IDkgDealingInternal, error) {
+func CorruptDealing(dealing *dealings.IDkgDealingInternal, corruptionTargets []common.NodeIndex, seed *seed2.Seed) (*dealings.IDkgDealingInternal, error) {
 	curveType := dealing.Commitment.CurveType()
 	rng := seed.Rng()
 	randomizer := curve.Scalar.Random(curveType, rng)
@@ -58,4 +58,19 @@ func CorruptDealingForAllRecipients(dealing *dealings.IDkgDealingInternal, seed 
 	}
 	return CorruptDealing(dealing, all, seed)
 
+}
+
+func TestPublicDealingVerification(setup *ProtocolSetup, dealing *dealings.IDkgDealingInternal, transcriptType *dealings.IDkgTranscriptOperationInternal, dealerIndex common.NodeIndex) {
+	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex, setup.Receivers, setup.Ad) != nil {
+		panic("created a publicly invalid dealing")
+	}
+	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex+1, setup.Receivers, setup.Ad) == nil {
+		panic("created a publicly invalid dealing")
+	}
+	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex+1, setup.Receivers+1, setup.Ad) == nil {
+		panic("created a publicly invalid dealing")
+	}
+	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex+1, setup.Receivers+1, []byte("wrong ad")) == nil {
+		panic("created a publicly invalid dealing")
+	}
 }

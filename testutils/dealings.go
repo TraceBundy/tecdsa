@@ -81,7 +81,7 @@ func OpenDealings(setup *ProtocolSetup, dealings *btree.Map[common.NodeIndex, *d
 	return openings, nil
 }
 
-func CreateDealings(setup *ProtocolSetup, shares []dealings2.SecretShares, numberOfDealers int, numberOfDealingsCorrupted int, transcriptType dealings2.IDkgTranscriptOperationInternal, seed *seed2.Seed) (*btree.Map[common.NodeIndex, dealings2.IDkgDealingInternal], error) {
+func CreateDealings(setup *ProtocolSetup, shares []dealings2.SecretShares, numberOfDealers int, numberOfDealingsCorrupted int, transcriptType dealings2.IDkgTranscriptOperationInternal, seed *seed2.Seed) (*btree.Map[common.NodeIndex, *dealings2.IDkgDealingInternal], error) {
 	rng := seed.Rng()
 	var dealings btree.Map[common.NodeIndex, *dealings2.IDkgDealingInternal]
 	for i, share := range shares {
@@ -90,7 +90,7 @@ func CreateDealings(setup *ProtocolSetup, shares []dealings2.SecretShares, numbe
 		if err != nil {
 			return nil, err
 		}
-		//todo testpublic
+		TestPublicDealingVerification(setup, dealing, transcriptType, dealerIndex)
 		sks, pks, recipients := setup.ReceiverInfo()
 		for i := 0; i < len(recipients); i++ {
 			sk, pk, recipient := sks[i], pks[i], recipients[i]
@@ -112,7 +112,34 @@ func CreateDealings(setup *ProtocolSetup, shares []dealings2.SecretShares, numbe
 		}
 		keys, values := dealingsToDamage.KeyValues()
 		for i := 0; i < len(keys); i++ {
-
+			dealerIndex, dealing := keys[i], values[i]
+			maxCorruptions := setup.Threshold
+			numberOfCorruptions := int(rng.Uint32())%maxCorruptions + 1
+			var corrupt btree.Map[common.NodeIndex, struct{}]
+			for corrupt.Len() < numberOfCorruptions {
+				corrupt.Set(common.NodeIndex(int(rng.Uint32())%setup.Receivers), struct{}{})
+			}
+			corruptedRecip := corrupt.Keys()
+			badDealing, err := CorruptDealing(dealing, corruptedRecip, seed2.FromRng(rng))
+			if err != nil {
+				return nil, err
+			}
+			sks, pks, recipientIndexs := setup.ReceiverInfo()
+			for i := 0; i < len(sks); i++ {
+				sk, pk, recipientIndex := sks[i], pks[i], recipientIndexs[i]
+				_, wasCorrupted := corrupt.Get(recipientIndex)
+				if badDealing.PrivateVerify(curve.K256, sk, pk, setup.Ad, dealerIndex, recipientIndex) != nil {
+					if !wasCorrupted {
+						panic("private verify failed")
+					}
+				} else {
+					if wasCorrupted {
+						panic("private verify failed")
+					}
+				}
+			}
+			dealings.Set(dealerIndex, badDealing)
 		}
 	}
+	return &dealings, nil
 }

@@ -49,7 +49,7 @@ func DeriveRho(curveType curve.EccCurveType, hashedMsg []byte, randomness []byte
 /// Returns a public key derived from `master_public_key` according to the
 /// `derivation_path`.  The algorithm id of the derived key is the same
 /// as the algorithm id of `master_public_key`.
-func DerivePublicKey(master key.MasterEcdsaPublicKey, derivationPath *key.DerivationPath) (*key.EcdsaPublicKey, error) {
+func DerivePublicKey(master *key.MasterEcdsaPublicKey, derivationPath *key.DerivationPath) (*key.EcdsaPublicKey, error) {
 	pk, err := curve.Point.Deserialize(curve.K256, master.PublicKey)
 	if err != nil {
 		return nil, err
