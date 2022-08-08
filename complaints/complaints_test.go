@@ -35,6 +35,6 @@ func TestShouldComplaintVerificationRejectSpuriousComplaints(t *testing.T) {
 
 	complaint, err := NewComplaintInternal(seed2.FromRng(rng), dealing, dealerIndex, receiverIndex, sk, pk, ad)
 	assert.Nil(t, err)
-	assert.Nil(t, complaint.Verify(dealing, dealerIndex, 0, pk, ad))
+	assert.NotNil(t, complaint.Verify(dealing, dealerIndex, 0, pk, ad))
 
 }

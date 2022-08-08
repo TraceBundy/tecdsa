@@ -151,7 +151,7 @@ func (s simpleCommitment) Create(poly *Polynomial, num int) (*SimpleCommitment, 
 }
 func (s *SimpleCommitment) Clone() PolynomialCommitment {
 	points := make([]curve.EccPoint, len(s.points), len(s.points))
-	for i, p := range points {
+	for i, p := range s.points {
 		points[i] = p.Clone()
 	}
 	return &SimpleCommitment{
@@ -242,7 +242,7 @@ func (s *SimpleCommitment) EvaluateAt(evalPoint common.NodeIndex) curve.EccPoint
 }
 
 func (s *SimpleCommitment) CheckOpening(evalPoint common.NodeIndex, opening CommitmentOpening) bool {
-	o := opening.(*PedersenCommitmentOpening)
+	o := opening.(SimpleCommitmentOpening)
 	return s.checkOpening(evalPoint, o[0])
 }
 func (s *SimpleCommitment) checkOpening(evalPoint common.NodeIndex, value curve.EccScalar) bool {
@@ -273,7 +273,7 @@ func (p pedersenCommitment) Create(values *Polynomial, masking *Polynomial, num 
 
 func (s *PedersenCommitment) Clone() PolynomialCommitment {
 	points := make([]curve.EccPoint, len(s.points), len(s.points))
-	for i, p := range points {
+	for i, p := range s.points {
 		points[i] = p.Clone()
 	}
 	return &PedersenCommitment{

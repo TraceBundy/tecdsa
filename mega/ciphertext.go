@@ -219,7 +219,7 @@ func (m MEGaCiphertextSingle) DecryptAndCheck(commitment poly.PolynomialCommitme
 	if err != nil {
 		return nil, err
 	}
-	opening := &poly.SimpleCommitmentOpening{scalar}
+	opening := poly.SimpleCommitmentOpening{scalar}
 	if !commitment.CheckOpening(receiverIndex, opening) {
 		return nil, errors.New("invalid commitment")
 	}
@@ -332,8 +332,8 @@ func (m MEGaCiphertextPair) DecryptAndCheck(commitment poly.PolynomialCommitment
 	if err != nil {
 		return nil, err
 	}
-	opening := &poly.PedersenCommitmentOpening{}
-	opening[1] = scalar[0]
+	opening := poly.PedersenCommitmentOpening{}
+	opening[0] = scalar[0]
 	opening[1] = scalar[1]
 	if !commitment.CheckOpening(receiverIndex, opening) {
 		return nil, errors.New("invalid commitment")

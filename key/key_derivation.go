@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"github.com/PlatONnetwork/tecdsa/common"
 	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/pkg/errors"
 	"hash"
+	"math"
 )
 
 //func ReverseBytes(inBytes []byte) []byte {

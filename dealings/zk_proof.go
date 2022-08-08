@@ -32,7 +32,7 @@ type ProductProof struct {
 }
 
 func (ProductProof) Type() ZkProofType {
-	return ProofOfMaskedResharing
+	return ProofOfProduct
 }
 func (p ProductProof) Clone() ZkProof {
 	return &ProductProof{

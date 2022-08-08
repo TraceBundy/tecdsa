@@ -93,7 +93,7 @@ func (c IDkgComplaintInternal) Verify(dealing *dealings.IDkgDealingInternal, dea
 		return errors.New("unexpected commitment type")
 	}
 
-	if !dealing.Commitment.CheckOpening(complainerIndex, commitOpening) {
+	if dealing.Commitment.CheckOpening(complainerIndex, commitOpening) {
 		return errors.New("invalid complaint")
 	}
 	return nil

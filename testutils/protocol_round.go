@@ -42,7 +42,7 @@ func (p protocolRound) New(setup *ProtocolSetup, dealings *btree.Map[common.Node
 }
 
 func (p protocolRound) Random(setup *ProtocolSetup, numberOfDealers int, numberOfDealingsCorrupted int) (*ProtocolRound, error) {
-	shares := make([]dealings.SecretShares, 0, numberOfDealers)
+	shares := make([]dealings.SecretShares, numberOfDealers, numberOfDealers)
 	for i, _ := range shares {
 		shares[i] = &dealings.RandomSecret{}
 	}
@@ -58,7 +58,7 @@ func (p protocolRound) Random(setup *ProtocolSetup, numberOfDealers int, numberO
 	return p.New(setup, dealings, transcript)
 }
 func (p protocolRound) ReshareOfMasked(setup *ProtocolSetup, masked *ProtocolRound, numberOfDealers int, numberOfDealingsCorrupted int) (*ProtocolRound, error) {
-	shares := make([]dealings.SecretShares, len(masked.Openings))
+	shares := make([]dealings.SecretShares, len(masked.Openings), len(masked.Openings))
 	for i, opening := range masked.Openings {
 		if o, ok := opening.(poly.PedersenCommitmentOpening); ok {
 			shares[i] = &dealings.ReshareOfMaskedSecret{S1: o[0], S2: o[1]}
@@ -113,7 +113,7 @@ func (p protocolRound) Multiply(setup *ProtocolSetup, masked *ProtocolRound, unm
 		}
 	}
 	mode := &dealings.UnmaskedTimesMaskedTranscript{Left: unmasked.Commitment.Clone(), Right: masked.Commitment.Clone()}
-	dealings, err := CreateDealings(setup, shares, numberOfDealingsCorrupted, numberOfDealingsCorrupted, mode, setup.NextDealingSeed())
+	dealings, err := CreateDealings(setup, shares, numberOfDealers, numberOfDealingsCorrupted, mode, setup.NextDealingSeed())
 	if err != nil {
 		return nil, err
 	}

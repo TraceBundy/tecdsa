@@ -5,6 +5,7 @@ import (
 	"github.com/PlatONnetwork/tecdsa/curve"
 	"github.com/PlatONnetwork/tecdsa/dealings"
 	"github.com/PlatONnetwork/tecdsa/mega"
+	"github.com/PlatONnetwork/tecdsa/rand"
 	seed2 "github.com/PlatONnetwork/tecdsa/seed"
 )
 
@@ -16,7 +17,7 @@ func CorruptDealing(dealing *dealings.IDkgDealingInternal, corruptionTargets []c
 	switch c := dealing.Ciphertext.(type) {
 	case *mega.MEGaCiphertextSingle:
 		ctexts := make([]curve.EccScalar, len(c.CTexts), len(c.CTexts))
-		for i, c := range ctexts {
+		for i, c := range c.CTexts {
 			ctexts[i] = c.Clone()
 		}
 		for _, target := range corruptionTargets {
@@ -30,7 +31,7 @@ func CorruptDealing(dealing *dealings.IDkgDealingInternal, corruptionTargets []c
 		}
 	case *mega.MEGaCiphertextPair:
 		ctexts := make([][2]curve.EccScalar, len(c.CTexts), len(c.CTexts))
-		for i, c := range ctexts {
+		for i, c := range c.CTexts {
 			ctexts[i][0] = c[0]
 			ctexts[i][1] = c[1]
 		}
@@ -44,14 +45,18 @@ func CorruptDealing(dealing *dealings.IDkgDealingInternal, corruptionTargets []c
 			CTexts:       ctexts,
 		}
 	}
+	var proof dealings.ZkProof
+	if dealing.Proof != nil {
+		proof = dealing.Proof.Clone()
+	}
 	return &dealings.IDkgDealingInternal{
 		Ciphertext: ciphertext,
 		Commitment: dealing.Commitment.Clone(),
-		Proof:      dealing.Proof.Clone(),
+		Proof:      proof,
 	}, nil
 }
 
-func CorruptDealingForAllRecipients(dealing *dealings.IDkgDealingInternal, seed seed2.Seed) (*dealings.IDkgDealingInternal, error) {
+func CorruptDealingForAllRecipients(dealing *dealings.IDkgDealingInternal, seed *seed2.Seed) (*dealings.IDkgDealingInternal, error) {
 	var all []common.NodeIndex
 	for i := 0; i < dealing.Ciphertext.Recipients(); i++ {
 		all = append(all, common.NodeIndex(i))
@@ -60,8 +65,8 @@ func CorruptDealingForAllRecipients(dealing *dealings.IDkgDealingInternal, seed 
 
 }
 
-func TestPublicDealingVerification(setup *ProtocolSetup, dealing *dealings.IDkgDealingInternal, transcriptType *dealings.IDkgTranscriptOperationInternal, dealerIndex common.NodeIndex) {
-	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex, setup.Receivers, setup.Ad) != nil {
+func TestPublicDealingVerification(setup *ProtocolSetup, dealing *dealings.IDkgDealingInternal, transcriptType dealings.IDkgTranscriptOperationInternal, dealerIndex common.NodeIndex) {
+	if err := dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex, setup.Receivers, setup.Ad); err != nil {
 		panic("created a publicly invalid dealing")
 	}
 	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex+1, setup.Receivers, setup.Ad) == nil {
@@ -73,4 +78,11 @@ func TestPublicDealingVerification(setup *ProtocolSetup, dealing *dealings.IDkgD
 	if dealing.PubliclyVerify(curve.K256, transcriptType, setup.Threshold, dealerIndex+1, setup.Receivers+1, []byte("wrong ad")) == nil {
 		panic("created a publicly invalid dealing")
 	}
+}
+
+func RandomSeed() *seed2.Seed {
+	//key, _ := crand.Prime(crand.Reader, 256)
+	var key [32]byte
+	rng := rand.NewChaCha20(key[:])
+	return seed2.FromRng(rng)
 }

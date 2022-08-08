@@ -3,8 +3,8 @@ module github.com/PlatONnetwork/tecdsa
 go 1.18
 
 require (
+	github.com/btcsuite/btcd v0.21.0-beta.0.20201114000516-e9c7a5ac6401
 	github.com/coinbase/kryptology v1.8.0
-	github.com/ethereum/go-ethereum v1.10.16
 	github.com/fxamacker/cbor/v2 v2.4.0
 	github.com/magiconair/properties v1.8.5
 	github.com/pkg/errors v0.9.1
@@ -15,6 +15,15 @@ require (
 	modernc.org/mathutil v1.4.1
 )
 
-require golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
+require (
+	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/kr/pretty v0.2.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
+	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1

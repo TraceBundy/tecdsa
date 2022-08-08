@@ -14,8 +14,7 @@ type SummationCommitment struct {
 }
 
 func (s SummationCommitment) Serialize() ([]byte, error) {
-	//TODO implement me
-	panic("implement me")
+	return s.PolynomialCommitment.Serialize()
 }
 
 type InterpolationCommitment struct {
@@ -23,6 +22,5 @@ type InterpolationCommitment struct {
 }
 
 func (i InterpolationCommitment) Serialize() ([]byte, error) {
-	//TODO implement me
-	panic("implement me")
+	return i.PolynomialCommitment.Serialize()
 }

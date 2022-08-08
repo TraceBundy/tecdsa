@@ -5,6 +5,7 @@ import (
 	"github.com/PlatONnetwork/tecdsa/rand"
 	"github.com/PlatONnetwork/tecdsa/seed"
 	"github.com/pkg/errors"
+	"math/big"
 )
 
 var (
@@ -25,6 +26,7 @@ type EccScalar interface {
 	Equal(other EccScalar) int
 	IsZero() int
 	IsHigh() bool
+	BigInt() *big.Int
 	Serialize() []byte
 	SerializeTagged() []byte
 }

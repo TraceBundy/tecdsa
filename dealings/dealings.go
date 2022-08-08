@@ -146,7 +146,7 @@ func (dealing IDkgDealingInternal) PubliclyVerify(curveType curve.EccCurveType, 
 		if err := dealing.Proof.(*MaskedResharingProof).Verify(t.P1.EvaluateAt(dealerIndex), dealing.Commitment.ConstantTerm(), ad); err != nil {
 			return err
 		}
-	} else if t, ok := transcriptType.(*ReshareOfUnmaskedTranscript); ok && dealing.Proof != nil {
+	} else if t, ok := transcriptType.(*ReshareOfUnmaskedTranscript); ok && dealing.Proof == nil {
 		if err := dealing.Commitment.VerifyIs(poly2.Simple, curveType); err != nil {
 			return err
 		}

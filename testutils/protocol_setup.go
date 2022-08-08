@@ -14,11 +14,11 @@ type ProtocolSetup struct {
 	Ad            []byte
 	Pk            []*mega.MEGaPublicKey
 	Sk            []*mega.MEGaPrivateKey
-	Seed          seed2.Seed
+	Seed          *seed2.Seed
 	ProtocolRound int
 }
 
-func NewProtocolSetup(curveType curve.EccCurveType, receivers int, threshold int, seed seed2.Seed) *ProtocolSetup {
+func NewProtocolSetup(curveType curve.EccCurveType, receivers int, threshold int, seed *seed2.Seed) *ProtocolSetup {
 	rng := seed.Rng()
 	var ad [32]byte
 	rng.FillUint8(ad[:])

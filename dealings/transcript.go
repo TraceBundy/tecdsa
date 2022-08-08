@@ -53,7 +53,7 @@ func CombineCommitmentsViaInterpolation(commitmentType poly.PolynomialCommitment
 	case poly.Pedersen:
 		cm = poly.PedersenCM.New(combined)
 	}
-	return InterpolationCommitment{cm}, nil
+	return &InterpolationCommitment{cm}, nil
 }
 
 func NewTranscriptInternal(curveType curve.EccCurveType, reconstructionThreshold int, verifiedDealings *btree.Map[common.NodeIndex, *IDkgDealingInternal], operationMode IDkgTranscriptOperationInternal) (*IDkgTranscriptInternal, error) {
@@ -81,7 +81,7 @@ func NewTranscriptInternal(curveType curve.EccCurveType, reconstructionThreshold
 				combined[i] = combined[i].AddPoints(combined[i], c[i])
 			}
 		}
-		combinedCommitment = SummationCommitment{poly.PedersenCM.New(combined)}
+		combinedCommitment = &SummationCommitment{poly.PedersenCM.New(combined)}
 	case *ReshareOfMaskedTranscript:
 		if o.P1.Type() != poly.Pedersen {
 			return nil, errors.New("unexpected commitment type")
@@ -170,7 +170,7 @@ func ReconstructShareFromOpenings(dealing *IDkgDealingInternal, openings *btree.
 		if err != nil {
 			return nil, err
 		}
-		commitmentOpening = &poly.SimpleCommitmentOpening{combinedValue}
+		commitmentOpening = poly.SimpleCommitmentOpening{combinedValue}
 	case *poly.PedersenCommitment:
 		xValues := make([]common.NodeIndex, 0, openings.Len())
 		values := make([]curve.EccScalar, 0, openings.Len())
@@ -202,7 +202,7 @@ func ReconstructShareFromOpenings(dealing *IDkgDealingInternal, openings *btree.
 		if combinedMask, err = coeffcients.InterpolateScalar(masks); err != nil {
 			return nil, err
 		}
-		commitmentOpening = &poly.PedersenCommitmentOpening{combinedValue, combinedMask}
+		commitmentOpening = poly.PedersenCommitmentOpening{combinedValue, combinedMask}
 	}
 	return dealing.Commitment.ReturnOpeningIfConsistent(shareIndex, commitmentOpening)
 }

@@ -1,12 +1,15 @@
 package testutils
 
 import (
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"github.com/PlatONnetwork/tecdsa/common"
 	"github.com/PlatONnetwork/tecdsa/curve"
 	"github.com/PlatONnetwork/tecdsa/key"
 	seed2 "github.com/PlatONnetwork/tecdsa/seed"
 	"github.com/PlatONnetwork/tecdsa/sign"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
 )
 
@@ -22,12 +25,33 @@ type SignatureProtocolSetup struct {
 func NewSignatureProtocolSetup(curveType curve.EccCurveType, numberOfDealers int, threshold int, numberOfDealingsCorrupted int, seed *seed2.Seed) (*SignatureProtocolSetup, error) {
 	setup := NewProtocolSetup(curveType, numberOfDealers, threshold, seed)
 	key, err := Round.Random(setup, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	kappa, err := Round.Random(setup, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	lambda, err := Round.Random(setup, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	key, err = Round.ReshareOfMasked(setup, key, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	kappa, err = Round.ReshareOfMasked(setup, kappa, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	keyTimesLambda, err := Round.Multiply(setup, lambda, key, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	kappaTimesLambda, err := Round.Multiply(setup, lambda, kappa, numberOfDealers, numberOfDealingsCorrupted)
+	if err != nil {
+		return nil, err
+	}
 	return &SignatureProtocolSetup{
 		Setup:            setup,
 		Key:              key,
@@ -82,9 +106,17 @@ func (s SignatureProtocolExecution) VerifySignature(sig *sign.ThresholdEcdsaComb
 	if err := sig.Verify(s.DerivationPath, s.HashedMessage, s.RandomBeacon, s.Setup.Kappa.Transcript, s.Setup.Key.Transcript, curve.K256); err != nil {
 		return err
 	}
-	//pk, err := s.Setup.PublicKey(s.DerivationPath)
-	//if err != nil {
-	//	return err
-	//}
+	pk, err := s.Setup.PublicKey(s.DerivationPath)
+	if err != nil {
+		return err
+	}
+	publicKey, _ := curve.Point.Deserialize(curve.K256, pk.PublicKey)
+	if !ecdsa.Verify(&ecdsa.PublicKey{
+		Curve: btcec.S256(),
+		X:     publicKey.AffineX().BigInt(),
+		Y:     publicKey.AffineY().BigInt(),
+	}, s.HashedMessage, sig.R.BigInt(), sig.S.BigInt()) {
+		return errors.New("verify signature failed")
+	}
 	return nil
 }
