@@ -1,8 +1,11 @@
 package testutils
 
 import (
+	"github.com/PlatONnetwork/tecdsa/common"
 	"github.com/PlatONnetwork/tecdsa/curve"
+	"github.com/PlatONnetwork/tecdsa/sign"
 	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/btree"
 	"testing"
 )
 
@@ -102,4 +105,17 @@ func TestShouldMultiplyTranscriptsWithDynamicThreshold(t *testing.T) {
 	assert.NotNil(t, err)
 	_, err = Round.Multiply(setup, randomb, resharedc, 3, corruptedDealings)
 	assert.Nil(t, err)
+}
+func RandomSubset(shares *btree.Map[common.NodeIndex, *sign.ThresholdEcdsaSigShareInternal], include int) *btree.Map[common.NodeIndex, *sign.ThresholdEcdsaSigShareInternal] {
+	rng := RandomSeed().Rng()
+	var result btree.Map[common.NodeIndex, *sign.ThresholdEcdsaSigShareInternal]
+	keys := shares.Keys()
+	for result.Len() != include {
+		key := keys[int(rng.Uint32())%len(keys)]
+		if _, ok := result.Get(key); !ok {
+			value, _ := shares.Get(key)
+			result.Set(key, value)
+		}
+	}
+	return &result
 }
