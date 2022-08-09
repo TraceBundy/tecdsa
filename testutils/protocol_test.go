@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/btree"
 	"testing"
+	"time"
 )
 
 func TestShouldReshareTranscriptsCorrectly(t *testing.T) {
@@ -122,14 +123,17 @@ func RandomSubset(shares *btree.Map[common.NodeIndex, *sign.ThresholdEcdsaSigSha
 }
 
 func TestShouldBasicSigningProtocolWork(t *testing.T) {
-	testSigSerialization := func(sig *sign.ThresholdEcdsaCombinedSigInternal) error {
-		return nil
-	}
-	nodes := 4
+	//testSigSerialization := func(sig *sign.ThresholdEcdsaCombinedSigInternal) error {
+	//	return nil
+	//}
+	nodes := 10
 	threshold := nodes / 3
 	numberOfDealingsCorrupted := threshold
+	start := time.Now()
 	setup, err := NewSignatureProtocolSetup(curve.K256, nodes, threshold, numberOfDealingsCorrupted, RandomSeed())
 	assert.Nil(t, err)
+	t.Log("set up", time.Since(start))
+
 	rng := RandomSeed().Rng()
 
 	var signedMessage [32]byte
@@ -137,19 +141,29 @@ func TestShouldBasicSigningProtocolWork(t *testing.T) {
 	var randomBeacon [32]byte
 	rng.FillUint8(signedMessage[:])
 	derivationPath := key.NewBip32([]uint32{1, 2, 3})
+	start = time.Now()
 	proto := NewSignatureProtocolExecution(setup, signedMessage[:], randomBeacon[:], derivationPath)
+	start = time.Now()
 	shares, err := proto.GenerateShares()
 	assert.Nil(t, err)
-	for i := 4; i <= nodes; i++ {
-		shares := RandomSubset(shares, i)
-		if shares.Len() < threshold {
-			_, err := proto.GenerateSignature(shares)
-			assert.NotNil(t, err)
-		} else {
-			sig, err := proto.GenerateSignature(shares)
-			assert.Nil(t, err)
-			testSigSerialization(sig)
-			assert.Nil(t, proto.VerifySignature(sig))
-		}
-	}
+	t.Log("generate shares", time.Since(start))
+	start = time.Now()
+	sig, err := proto.GenerateSignature(shares)
+	t.Log("generate signature", time.Since(start))
+	start = time.Now()
+	assert.Nil(t, proto.VerifySignature(sig))
+	t.Log("verify signature", time.Since(start))
+
+	//for i := 4; i <= nodes; i++ {
+	//	shares := RandomSubset(shares, i)
+	//	if shares.Len() < threshold {
+	//		_, err := proto.GenerateSignature(shares)
+	//		assert.NotNil(t, err)
+	//	} else {
+	//		sig, err := proto.GenerateSignature(shares)
+	//		assert.Nil(t, err)
+	//		testSigSerialization(sig)
+	//		assert.Nil(t, proto.VerifySignature(sig))
+	//	}
+	//}
 }

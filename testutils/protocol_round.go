@@ -71,10 +71,12 @@ func (p protocolRound) ReshareOfMasked(setup *ProtocolSetup, masked *ProtocolRou
 	if err != nil {
 		return nil, err
 	}
+
 	transcript, err := CreateTranscript(setup, dealings, mode)
 	if err != nil {
 		return nil, err
 	}
+
 	return p.New(setup, dealings, transcript)
 }
 

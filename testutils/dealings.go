@@ -65,7 +65,7 @@ func OpenDealings(setup *ProtocolSetup, dealings *btree.Map[common.NodeIndex, *d
 				}
 				for openingsForThisDealing.Len() > reconstructionThreshold {
 					index := int(rng.Uint32()) % openingsForThisDealing.Len()
-					openingsForThisDealing.Delete(common.NodeIndex(index))
+					openingsForThisDealing.Delete(openingsForThisDealing.Keys()[index])
 				}
 				providedOpenings.Set(dealerIndex, &openingsForThisDealing)
 				return true

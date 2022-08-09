@@ -11,6 +11,12 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
+	"log"
+	"os"
+)
+
+var (
+	logger = log.New(os.Stdout, "logger: ", log.Lshortfile)
 )
 
 type SignatureProtocolSetup struct {
