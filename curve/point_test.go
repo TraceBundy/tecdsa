@@ -4,8 +4,8 @@ import (
 	crand "crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/rand"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/rand"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -1,9 +1,9 @@
 package mega
 
 import (
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	"github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/rand"
+	"github.com/TraceBundy/tecdsa/seed"
 )
 
 var (

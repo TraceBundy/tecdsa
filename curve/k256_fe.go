@@ -2,7 +2,7 @@ package curve
 
 import (
 	"encoding/hex"
-	"github.com/PlatONnetwork/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/common"
 	"github.com/coinbase/kryptology/pkg/core/curves/native"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/k256/fp"
 	"math/big"

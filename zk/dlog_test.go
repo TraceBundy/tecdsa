@@ -1,8 +1,8 @@
 package zk
 
 import (
-	"github.com/PlatONnetwork/tecdsa/curve"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/curve"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

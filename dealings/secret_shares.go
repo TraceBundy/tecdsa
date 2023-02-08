@@ -1,8 +1,8 @@
 package dealings
 
 import (
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/poly"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/poly"
 	"github.com/pkg/errors"
 )
 

@@ -1,11 +1,11 @@
 package sign
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/dealings"
-	"github.com/PlatONnetwork/tecdsa/key"
-	poly2 "github.com/PlatONnetwork/tecdsa/poly"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/dealings"
+	"github.com/TraceBundy/tecdsa/key"
+	poly2 "github.com/TraceBundy/tecdsa/poly"
 	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
 )

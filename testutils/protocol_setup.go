@@ -2,10 +2,10 @@ package testutils
 
 import (
 	"fmt"
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/mega"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/mega"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 )
 
 type ProtocolSetup struct {

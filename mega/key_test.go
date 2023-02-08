@@ -3,9 +3,9 @@ package mega
 import (
 	crand "crypto/rand"
 	"encoding/hex"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/rand"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

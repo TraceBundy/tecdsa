@@ -1,10 +1,10 @@
 package dealings
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/mega"
-	"github.com/PlatONnetwork/tecdsa/poly"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/mega"
+	"github.com/TraceBundy/tecdsa/poly"
 	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
 )

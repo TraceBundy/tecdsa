@@ -1,8 +1,8 @@
 package poly
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/pkg/errors"
 )

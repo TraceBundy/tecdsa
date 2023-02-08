@@ -1,6 +1,6 @@
 package dealings
 
-import "github.com/PlatONnetwork/tecdsa/zk"
+import "github.com/TraceBundy/tecdsa/zk"
 
 const (
 	ProofOfMaskedResharing = ZkProofType(0)

@@ -2,7 +2,7 @@ package curve
 
 import (
 	"encoding/hex"
-	"github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

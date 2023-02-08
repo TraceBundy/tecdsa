@@ -2,8 +2,8 @@ package dealings
 
 import (
 	"bytes"
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
 )
 
 type IDkgTranscriptInternal struct {

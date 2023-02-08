@@ -3,8 +3,8 @@ package ro
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/seed"
 	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
 	"math"

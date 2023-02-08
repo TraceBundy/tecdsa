@@ -2,14 +2,14 @@ package complaints
 
 import (
 	"fmt"
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/dealings"
-	"github.com/PlatONnetwork/tecdsa/mega"
-	poly2 "github.com/PlatONnetwork/tecdsa/poly"
-	ro2 "github.com/PlatONnetwork/tecdsa/ro"
-	"github.com/PlatONnetwork/tecdsa/seed"
-	"github.com/PlatONnetwork/tecdsa/zk"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/dealings"
+	"github.com/TraceBundy/tecdsa/mega"
+	poly2 "github.com/TraceBundy/tecdsa/poly"
+	ro2 "github.com/TraceBundy/tecdsa/ro"
+	"github.com/TraceBundy/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/zk"
 	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
 )

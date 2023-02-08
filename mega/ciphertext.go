@@ -1,11 +1,11 @@
 package mega
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/poly"
-	"github.com/PlatONnetwork/tecdsa/seed"
-	"github.com/PlatONnetwork/tecdsa/zk"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/poly"
+	"github.com/TraceBundy/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/zk"
 	"github.com/pkg/errors"
 )
 

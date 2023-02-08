@@ -2,9 +2,9 @@ package zk
 
 import (
 	crand "crypto/rand"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/rand"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -15,7 +15,7 @@ func rng() *rand.ChaCha20 {
 	return rng
 }
 func TestZkEqualOpeningsProofWork(t *testing.T) {
-	curveType := curve.K256
+	curveType := git
 	rng := rng()
 	var ad [32]byte
 	rng.FillUint8(ad[:])

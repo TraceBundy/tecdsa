@@ -2,7 +2,7 @@ package curve
 
 import (
 	"encoding/hex"
-	"github.com/PlatONnetwork/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/common"
 	"github.com/pkg/errors"
 )
 

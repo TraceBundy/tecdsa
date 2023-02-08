@@ -2,16 +2,24 @@ package dealings
 
 import (
 	crand "crypto/rand"
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/mega"
-	poly2 "github.com/PlatONnetwork/tecdsa/poly"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"encoding/hex"
+	"fmt"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/mega"
+	poly2 "github.com/TraceBundy/tecdsa/poly"
+	"github.com/TraceBundy/tecdsa/rand"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
+func TestBytes(t *testing.T) {
+	bytes, _ := hex.DecodeString("e1d01458bdb576c16302718e953f5a912b424499541d71fbf0e11bdecd0af13f070b25d97f858889bd500344d9b30071578312c1777af5fb3e5faf72a2d6010c")
+	x := common.ReverseBytes(bytes[0:32])
+	y := common.ReverseBytes(bytes[32:])
+	fmt.Println(hex.EncodeToString(append(x, y...)))
+}
 func genRng() rand.Rand {
 	key, _ := crand.Prime(crand.Reader, 256)
 	rng := rand.NewChaCha20(key.Bytes())

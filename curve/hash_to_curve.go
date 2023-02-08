@@ -1,7 +1,7 @@
 package curve
 
 import (
-	"github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/seed"
 	"github.com/pkg/errors"
 )
 

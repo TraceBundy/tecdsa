@@ -2,12 +2,12 @@ package testutils
 
 import (
 	"fmt"
-	"github.com/PlatONnetwork/tecdsa/common"
-	complaints2 "github.com/PlatONnetwork/tecdsa/complaints"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	dealings2 "github.com/PlatONnetwork/tecdsa/dealings"
-	"github.com/PlatONnetwork/tecdsa/poly"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/common"
+	complaints2 "github.com/TraceBundy/tecdsa/complaints"
+	"github.com/TraceBundy/tecdsa/curve"
+	dealings2 "github.com/TraceBundy/tecdsa/dealings"
+	"github.com/TraceBundy/tecdsa/poly"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 	"github.com/pkg/errors"
 	"github.com/tidwall/btree"
 )

@@ -1,4 +1,4 @@
-module github.com/PlatONnetwork/tecdsa
+module github.com/TraceBundy/tecdsa
 
 go 1.18
 

@@ -1,12 +1,12 @@
 package testutils
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/dealings"
-	"github.com/PlatONnetwork/tecdsa/mega"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/dealings"
+	"github.com/TraceBundy/tecdsa/mega"
+	"github.com/TraceBundy/tecdsa/rand"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 )
 
 func CorruptDealing(dealing *dealings.IDkgDealingInternal, corruptionTargets []common.NodeIndex, seed *seed2.Seed) (*dealings.IDkgDealingInternal, error) {

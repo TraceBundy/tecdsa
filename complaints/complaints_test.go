@@ -2,12 +2,12 @@ package complaints
 
 import (
 	crand "crypto/rand"
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/dealings"
-	"github.com/PlatONnetwork/tecdsa/mega"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	seed2 "github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/dealings"
+	"github.com/TraceBundy/tecdsa/mega"
+	"github.com/TraceBundy/tecdsa/rand"
+	seed2 "github.com/TraceBundy/tecdsa/seed"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

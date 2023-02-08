@@ -1,9 +1,9 @@
 package curve
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/rand"
-	"github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/rand"
+	"github.com/TraceBundy/tecdsa/seed"
 	"github.com/pkg/errors"
 	"math/big"
 )

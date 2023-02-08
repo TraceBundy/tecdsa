@@ -1,9 +1,9 @@
 package zk
 
 import (
-	"github.com/PlatONnetwork/tecdsa/curve"
-	ro2 "github.com/PlatONnetwork/tecdsa/ro"
-	"github.com/PlatONnetwork/tecdsa/seed"
+	"github.com/TraceBundy/tecdsa/curve"
+	ro2 "github.com/TraceBundy/tecdsa/ro"
+	"github.com/TraceBundy/tecdsa/seed"
 	"github.com/pkg/errors"
 )
 

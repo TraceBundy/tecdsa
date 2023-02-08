@@ -1,7 +1,7 @@
 package dealings
 
 import (
-	"github.com/PlatONnetwork/tecdsa/poly"
+	"github.com/TraceBundy/tecdsa/poly"
 )
 
 type CombinedCommitment interface {

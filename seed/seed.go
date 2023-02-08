@@ -2,7 +2,7 @@ package seed
 
 import (
 	"crypto/cipher"
-	"github.com/PlatONnetwork/tecdsa/rand"
+	"github.com/TraceBundy/tecdsa/rand"
 	"go.dedis.ch/kyber/v3/util/random"
 )
 

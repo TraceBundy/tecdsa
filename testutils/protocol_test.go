@@ -1,10 +1,10 @@
 package testutils
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	"github.com/PlatONnetwork/tecdsa/key"
-	"github.com/PlatONnetwork/tecdsa/sign"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	"github.com/TraceBundy/tecdsa/key"
+	"github.com/TraceBundy/tecdsa/sign"
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/btree"
 	"testing"

@@ -1,9 +1,9 @@
 package testutils
 
 import (
-	"github.com/PlatONnetwork/tecdsa/common"
-	"github.com/PlatONnetwork/tecdsa/curve"
-	dealings2 "github.com/PlatONnetwork/tecdsa/dealings"
+	"github.com/TraceBundy/tecdsa/common"
+	"github.com/TraceBundy/tecdsa/curve"
+	dealings2 "github.com/TraceBundy/tecdsa/dealings"
 	"github.com/tidwall/btree"
 )
 
